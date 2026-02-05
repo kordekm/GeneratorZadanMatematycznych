@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { ConfigPanel } from './components/ConfigPanel';
 import { Preview } from './components/Preview';
-import type { Config, Task, ValidationError } from './types';
-import { generateSeed, generateTasks, GeneratorError } from './utils/generator';
+import { useTaskGenerator } from './hooks/useTaskGenerator';
+import type { Config, ValidationError } from './types';
+import { generateSeed } from './utils/generator';
 import { validateConfig } from './utils/validation';
 
 const DEFAULT_CONFIG: Config = {
@@ -29,54 +30,21 @@ const DEFAULT_CONFIG: Config = {
 
 function App() {
   const [config, setConfig] = useState<Config>(DEFAULT_CONFIG);
-  const [tasks, setTasks] = useState<Task[]>([]);
   const [errors, setErrors] = useState<ValidationError[]>([]);
-  const [generatorError, setGeneratorError] = useState<string | null>(null);
-  const [isGenerating, setIsGenerating] = useState(false);
+  const { tasks, isGenerating, error: generatorError, generate } = useTaskGenerator();
 
   useEffect(() => {
     const validationErrors = validateConfig(config);
     setErrors(validationErrors);
     
     if (validationErrors.length === 0) {
-      setIsGenerating(true);
-      setGeneratorError(null);
-      
       const timeoutId = setTimeout(() => {
-        try {
-          const newTasks = generateTasks(
-            config.taskCount,
-            config.minValue,
-            config.maxValue,
-            config.minTerms,
-            config.maxTerms,
-            config.carryMode,
-            config.seed,
-            config.operations,
-            config.allowNegativeResults
-          );
-          setTasks(newTasks);
-          setGeneratorError(null);
-        } catch (error) {
-          if (error instanceof GeneratorError) {
-            setGeneratorError(error.message);
-            setTasks([]);
-          } else {
-            console.error('Unexpected error:', error);
-            setGeneratorError('Wystąpił nieoczekiwany błąd');
-            setTasks([]);
-          }
-        } finally {
-          setIsGenerating(false);
-        }
+        generate(config);
       }, 300);
       
       return () => clearTimeout(timeoutId);
-    } else {
-      setTasks([]);
-      setIsGenerating(false);
     }
-  }, [config.taskCount, config.minValue, config.maxValue, config.minTerms, config.maxTerms, config.carryMode, config.seed, config.operations, config.allowNegativeResults]);
+  }, [config, generate]);
 
   const handlePrint = () => {
     if (tasks.length === 0) return;

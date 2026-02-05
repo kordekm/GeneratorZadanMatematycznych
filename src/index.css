@@ -1,0 +1,125 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  font-family: 'Roboto Mono', monospace;
+  line-height: 1.5;
+  font-weight: 400;
+  
+  color-scheme: light;
+  color: rgba(0, 0, 0, 0.87);
+  background-color: #f9fafb;
+  
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+@media print {
+  @page {
+    size: A4;
+    margin: 1cm;
+  }
+  
+  html, body {
+    background: white !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+  
+  header,
+  footer,
+  button,
+  .no-print {
+    display: none !important;
+  }
+  
+  main {
+    padding: 0 !important;
+    margin: 0 !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+  
+  .container {
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  
+  .grid {
+    display: grid !important;
+  }
+  
+  .overflow-y-auto,
+  .h-full,
+  [style*="height"] {
+    overflow: visible !important;
+    height: auto !important;
+    max-height: none !important;
+    min-height: 0 !important;
+  }
+  
+  .gap-8 {
+    gap: 2rem !important;
+  }
+  
+  .bg-gray-100 {
+    background: white !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+  }
+  
+  .bg-white {
+    background: white !important;
+    box-shadow: none !important;
+  }
+  
+  .rounded-lg,
+  .shadow-lg,
+  .shadow-md {
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+  
+  .print-page {
+    page-break-after: always !important;
+    page-break-before: auto !important;
+    page-break-inside: avoid !important;
+    break-after: page !important;
+    break-inside: avoid !important;
+    margin: 0 auto !important;
+    padding: 1cm !important;
+    width: 100% !important;
+    max-width: 210mm !important;
+    height: auto !important;
+    display: block !important;
+    position: relative !important;
+  }
+  
+  .print-page:last-child {
+    page-break-after: auto !important;
+    break-after: auto !important;
+  }
+  
+  .space-y-8 {
+    gap: 0 !important;
+    display: block !important;
+  }
+  
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}

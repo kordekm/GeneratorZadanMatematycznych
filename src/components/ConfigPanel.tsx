@@ -18,7 +18,7 @@ export function ConfigPanel({ config, onChange, errors }: ConfigPanelProps) {
       <div className="space-y-6">
         <AdditionConfig config={config} onChange={onChange} />
         <SubtractionConfig config={config} onChange={onChange} />
-        <MultiplicationConfigPanel config={config} onChange={onChange} errors={errors} />
+        <MultiplicationConfigPanel config={config} onChange={onChange} />
         <AppearanceConfig config={config} onChange={onChange} errors={errors} />
       </div>
     </div>

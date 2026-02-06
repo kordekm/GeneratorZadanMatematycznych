@@ -1,13 +1,12 @@
 
-import type { Config, ValidationError } from '../../types';
+import type { Config } from '../../types';
 
 interface MultiplicationConfigProps {
     config: Config;
     onChange: (config: Config) => void;
-    errors: ValidationError[];
 }
 
-export function MultiplicationConfigPanel({ config, onChange, errors }: MultiplicationConfigProps) {
+export function MultiplicationConfigPanel({ config, onChange }: MultiplicationConfigProps) {
 
     const handleChange = (field: keyof Config['multiplication'], value: any) => {
         onChange({

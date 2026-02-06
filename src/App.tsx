@@ -4,6 +4,7 @@ import { Preview } from './components/Preview';
 import { useTaskGenerator } from './hooks/useTaskGenerator';
 import type { Config, ValidationError } from './types';
 import { generateSeed } from './utils/generator';
+import { loadConfig, saveConfig } from './utils/localStorage';
 
 const DEFAULT_CONFIG: Config = {
   // Visual settings
@@ -44,9 +45,28 @@ const DEFAULT_CONFIG: Config = {
 };
 
 function App() {
-  const [config, setConfig] = useState<Config>(DEFAULT_CONFIG);
+  const [config, setConfig] = useState<Config>(() => {
+    const savedConfig = loadConfig();
+    if (savedConfig) {
+      // Merge with DEFAULT_CONFIG to handle new fields added after saving
+      return { 
+        ...DEFAULT_CONFIG, 
+        ...savedConfig,
+        // Ensure nested objects are also merged properly
+        addition: { ...DEFAULT_CONFIG.addition, ...savedConfig.addition },
+        subtraction: { ...DEFAULT_CONFIG.subtraction, ...savedConfig.subtraction },
+        multiplication: { ...DEFAULT_CONFIG.multiplication, ...savedConfig.multiplication }
+      };
+    }
+    return DEFAULT_CONFIG;
+  });
   const [errors, setErrors] = useState<ValidationError[]>([]);
   const { tasks, isGenerating, error: generatorError, generate } = useTaskGenerator();
+
+  // Save configuration to localStorage whenever it changes
+  useEffect(() => {
+    saveConfig(config);
+  }, [config]);
 
   useEffect(() => {
     // Basic validation to ensure total count > 0 if we want to enforce it, 
@@ -67,6 +87,13 @@ function App() {
   const handlePrint = () => {
     if (tasks.length === 0) return;
     window.print();
+  };
+
+  const handleNewSet = () => {
+    setConfig(prev => ({
+      ...prev,
+      seed: generateSeed()
+    }));
   };
 
   const getTitle = () => {
@@ -95,13 +122,21 @@ function App() {
               <h1 className="text-3xl font-bold">{getTitle()}</h1>
               <p className="text-blue-100 mt-2">Twórz spersonalizowane karty pracy z działaniami pisemnymi</p>
             </div>
-            <button
-              onClick={handlePrint}
-              disabled={tasks.length === 0 || errors.length > 0}
-              className="px-6 py-3 bg-white text-blue-600 rounded-lg hover:bg-blue-50 disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed font-semibold shadow-lg transition no-print"
-            >
-              🖨️ Drukuj zadania
-            </button>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={handleNewSet}
+                className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-400 font-semibold shadow-lg transition no-print"
+              >
+                🔄 Nowy zestaw
+              </button>
+              <button
+                onClick={handlePrint}
+                disabled={tasks.length === 0 || errors.length > 0}
+                className="px-6 py-3 bg-white text-blue-600 rounded-lg hover:bg-blue-50 disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed font-semibold shadow-lg transition no-print"
+              >
+                🖨️ Drukuj zadania
+              </button>
+            </div>
           </div>
         </div>
       </header>

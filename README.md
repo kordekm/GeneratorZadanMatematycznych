@@ -1,32 +1,46 @@
-# Generator Kart Pracy - Działania w Słupkach
+# Generator Kart Pracy z Matematyki - Działania w Słupkach
 
-Aplikacja webowa do generowania spersonalizowanych kart pracy z zadaniami z dodawania i odejmowania pisemnego (w słupkach) dla dzieci.
+Aplikacja webowa do generowania spersonalizowanych kart pracy z zadaniami z dodawania, odejmowania i mnożenia pisemnego (w słupkach) dla dzieci.
 
 ## 🎯 Funkcje
 
-- **Wybór rodzaju działań z proporcjami**
+### Rodzaje działań
 
-  - Dodawanie (%)
-  - Odejmowanie (%)
-  - Działania mieszane (%) - losowe mieszanie + i - w jednym zadaniu
-  - Możliwość wyników ujemnych w odejmowaniu
-- **Konfigurowalne parametry zadań**
+Każdy typ działania można włączyć/wyłączyć niezależnie:
 
-  - Zakres liczb (min/max) - określa maksymalną liczbę cyfr
+- **➕ Dodawanie w słupku**
+  - Liczba zadań (0-100)
+  - Zakres wartości (min/max)
   - Liczba składników (2-8)
-  - Liczba zadań (5-200)
-- **Tryby przeniesień/pożyczania**
+  - Niezależna konfiguracja dla każdego zestawu
 
-  - Bez przeniesień/pożyczania
-  - Musi być przeniesienie/pożyczanie
-  - Dowolne (losowe)
-- **Personalizacja wyglądu**
+- **➖ Odejmowanie w słupku**
+  - Liczba zadań (0-100)
+  - Zakres wartości (min/max)
+  - Opcja wyników ujemnych
+  - Zawsze 2 składniki
 
-  - Rozmiar czcionki (18-72px) - automatycznie wpływa na paginację
-  - Kratka zeszytowa (wyłączona/jasna/średnia)
-  - Liczba kolumn (1-4)
-  - Numerowanie zadań
-  - Dynamiczny nagłówek dostosowany do wybranych działań
+- **✖️ Mnożenie w słupku**
+  - Liczba zadań (0-100)
+  - Liczba cyfr czynnika 1 (1-4 cyfry)
+  - Liczba cyfr czynnika 2 (1-3 cyfry)
+  - Niezależne od globalnych ustawień zakresu
+
+### Tryby przeniesień/pożyczania
+
+Globalne ustawienie dla wszystkich działań:
+- **Bez przeniesień/pożyczania** - tylko proste działania
+- **Musi być przeniesienie/pożyczanie** - wymusza trudniejsze zadania
+- **Dowolne** - losowy mix
+
+### Personalizacja wyglądu
+
+- Rozmiar czcionki (18-72px)
+- Kratka zeszytowa (wyłączona/jasna/średnia)
+- Liczba kolumn (1-4)
+- Numerowanie zadań
+- Automatyczna paginacja
+- Dynamiczny nagłówek
 
 ## 📋 Wymagania
 
@@ -69,112 +83,139 @@ npm run preview
 
 ## 📖 Jak używać
 
-1. **Wybierz rodzaj działań**:
+1. **Wybierz rodzaje działań**:
+   - Włącz/wyłącz dodawanie, odejmowanie lub mnożenie przełącznikami
+   - Dla każdego typu ustaw liczbę zadań
+   - Skonfiguruj parametry specyficzne dla danego działania
 
-   - Ustaw proporcje dla dodawania, odejmowania i działań mieszanych (wartości w %)
-   - Jeśli wybierzesz odejmowanie, możesz zaznaczyć opcję "Zezwól na wyniki ujemne"
-2. **Skonfiguruj parametry zadań**:
+2. **Skonfiguruj parametry**:
+   - **Dodawanie**: zakres liczb (min/max), liczba składników (2-8)
+   - **Odejmowanie**: zakres liczb (min/max), opcja wyników ujemnych
+   - **Mnożenie**: liczba cyfr dla obu czynników (niezależnie od zakresu)
 
-   - Ustaw zakres liczb (określa maksymalną liczbę cyfr)
-   - Wybierz liczbę składników (2-8)
-   - Określ liczbę zadań do wygenerowania (5-200)
-3. **Dostosuj wygląd**:
+3. **Ustaw tryb przeniesień** (globalnie dla wszystkich działań):
+   - Bez przeniesień/pożyczania
+   - Musi być przeniesienie/pożyczanie
+   - Dowolne
 
-   - Zmień rozmiar czcionki (większa czcionka = mniej zadań na stronę)
-   - Włącz/wyłącz kratkę zeszytową
-   - Wybierz liczbę kolumn (1-4)
-   - Włącz/wyłącz numerowanie zadań
-4. **Podgląd na żywo**:
+4. **Dostosuj wygląd**:
+   - Rozmiar czcionki (18-72px)
+   - Kratka zeszytowa (wyłączona/jasna/średnia)
+   - Liczba kolumn (1-4)
+   - Numerowanie zadań
 
-   - Podgląd aktualizuje się automatycznie
+5. **Podgląd na żywo**:
+   - Podgląd aktualizuje się automatycznie po każdej zmianie
    - Widzisz dokładnie to, co zostanie wydrukowane
-5. **Drukowanie/Zapisywanie**:
 
-   - Kliknij "Drukuj zadania"
-   - W oknie dialogowym drukowania możesz wydrukować lub zapisać jako PDF
+6. **Generowanie i drukowanie**:
+   - Kliknij "🔄 Nowy zestaw" aby wygenerować inne zadania z tymi samymi ustawieniami
+   - Kliknij "🖨️ Drukuj zadania" aby wydrukować lub zapisać jako PDF
+   - Ustawienia są automatycznie zapisywane w przeglądarce
 
 ## 🔧 Technologie
 
 - **React 18** - framework UI
-- **TypeScript** - typowanie
-- **Vite** - build tool
+- **TypeScript** - typowanie statyczne
+- **Vite** - build tool i dev server
 - **Tailwind CSS** - stylowanie
+- **Web Workers** - generowanie zadań w tle
 - **seedrandom** - deterministyczna losowość
+- **localStorage** - zapisywanie konfiguracji
 
-## 📐 Algorytm paginacji
+## 📐 Architektura i algorytmy
 
-Aplikacja automatycznie oblicza ile zadań mieści się na stronie na podstawie:
-
-- Rozmiaru czcionki
-- Liczby składników w zadaniach
-- Marginesów i nagłówka
-- Liczby kolumn
+### Paginacja
+Aplikacja automatycznie oblicza ile zadań mieści się na stronie:
+- Rozmiar czcionki
+- Maksymalna liczba składników w zadaniach
+- Marginesy i nagłówek
+- Liczba kolumn
 
 **Większa czcionka = mniej zadań na stronę = więcej stron PDF**
+
+### Generowanie zadań
+- Wykorzystuje **Web Workers** do generowania w tle (nie blokuje UI)
+- System seed zapewnia powtarzalność zestawów
+- Inteligentne algorytmy naprawiające dla trybu przeniesień
+- Timeout 5 sekund dla bezpieczeństwa
+- Maksymalnie 1000 prób na zadanie
 
 ## 🎓 Logika przeniesień i pożyczania
 
 Generator symuluje działania kolumnami od prawej do lewej:
 
-- **Dodawanie**: wykrywa przeniesienia między kolumnami (gdy suma cyfr ≥ 10)
-- **Odejmowanie**: wykrywa pożyczanie między kolumnami (gdy cyfra jest mniejsza od odejmowanej)
-- **Działania mieszane**: obsługuje zarówno przeniesienia jak i pożyczanie
-- Odrzuca losowania niespełniające wybranego trybu
-- Ma limit 1000 prób - jeśli nie uda się wygenerować, wyświetla komunikat z sugestią zmiany parametrów
+- **Dodawanie**: wykrywa przeniesienia (gdy suma cyfr w kolumnie ≥ 10)
+- **Odejmowanie**: wykrywa pożyczanie (gdy cyfra jest mniejsza od odejmowanej)
+- **Mnożenie**: wykrywa przeniesienia w mnożeniu cyfr i sumowaniu wyników cząstkowych
+- Inteligentne naprawianie liczb po 10 nieudanych próbach losowych
+- Limit 1000 prób na zadanie
+- Timeout 5 sekund dla całego zestawu
+- Komunikaty błędów z sugestiami rozwiązania
 
 ## 📝 Przykładowe użycie
 
 ### Zadania dla początkujących - dodawanie bez przeniesień
 
-- Dodawanie: 100%, Odejmowanie: 0%, Mieszane: 0%
-- Min: 10, Max: 40
-- Składniki: 2-3
-- Tryb: Bez przeniesień
-- Czcionka: 48px
+- **Dodawanie**: włączone, 20 zadań, min: 10, max: 40, składniki: 2-3
+- **Odejmowanie**: wyłączone
+- **Mnożenie**: wyłączone
+- **Tryb**: Bez przeniesień
+- **Czcionka**: 48px
 
 ### Zadania z odejmowaniem - tylko wyniki dodatnie
 
-- Dodawanie: 0%, Odejmowanie: 100%, Mieszane: 0%
-- Wyniki ujemne: NIE
-- Min: 10, Max: 99
-- Składniki: 2
-- Czcionka: 40px
+- **Dodawanie**: wyłączone
+- **Odejmowanie**: włączone, 15 zadań, min: 10, max: 99, bez wyników ujemnych
+- **Mnożenie**: wyłączone
+- **Tryb**: Dowolne
+- **Czcionka**: 40px
 
 ### Zadania mieszane - średniozaawansowane
 
-- Dodawanie: 50%, Odejmowanie: 30%, Mieszane: 20%
-- Wyniki ujemne: TAK
-- Min: 10, Max: 500
-- Składniki: 3-4
-- Tryb: Musi być przeniesienie/pożyczanie
-- Czcionka: 32px
+- **Dodawanie**: włączone, 10 zadań, min: 10, max: 500, składniki: 3-4
+- **Odejmowanie**: włączone, 10 zadań, min: 10, max: 500, z wynikami ujemnymi
+- **Mnożenie**: wyłączone
+- **Tryb**: Musi być przeniesienie/pożyczanie
+- **Czcionka**: 32px
+- **Kolumny**: 2
 
 ### Zadania trudne - wszystkie typy
 
-- Dodawanie: 40%, Odejmowanie: 30%, Mieszane: 30%
-- Wyniki ujemne: TAK
-- Min: 100, Max: 9999
-- Składniki: 4-6
-- Tryb: Dowolne
-- Czcionka: 24px
+- **Dodawanie**: włączone, 8 zadań, min: 100, max: 9999, składniki: 4-6
+- **Odejmowanie**: włączone, 6 zadań, min: 100, max: 9999, z wynikami ujemnymi
+- **Mnożenie**: włączone, 6 zadań, czynnik 1: 3 cyfry, czynnik 2: 2 cyfry
+- **Tryb**: Dowolne
+- **Czcionka**: 24px
+- **Kolumny**: 3
 
 ## 🐛 Rozwiązywanie problemów
 
 ### Błąd "Nie można wygenerować zadania"
 
-- Zmniejsz liczbę składników
-- Zwiększ zakres liczb
-- Zmień tryb przeniesień/pożyczania na "Dowolne"
-- Dla odejmowania bez wyników ujemnych: zwiększ zakres liczb lub zmniejsz liczbę składników
+**Przyczyny i rozwiązania:**
+- **Zbyt restrykcyjne parametry**: zmień tryb na "Dowolne" lub zwiększ zakres liczb
+- **Odejmowanie bez wyników ujemnych**: zwiększ zakres liczb (max musi być wystarczająco duże)
+- **Mnożenie z "bez przeniesień"**: bardzo trudne, spróbuj trybu "Dowolne"
+- **Zbyt wiele składników**: zmniejsz liczbę składników w dodawaniu
 
-### Błąd "Musisz wybrać przynajmniej jedno działanie"
+### Brak zadań do wyświetlenia
 
-- Ustaw wartość większą niż 0 dla przynajmniej jednego typu działania (dodawanie, odejmowanie lub mieszane)
+- Upewnij się, że przynajmniej jedno działanie jest włączone (przełącznik)
+- Sprawdź czy liczba zadań jest większa od 0
 
 ### Zadania się powtarzają
 
-- Aplikacja używa systemu seed - te same ustawienia generują te same zadania
-- To jest funkcja, nie błąd - pozwala na powtarzalność zestawów
+- **To jest funkcja, nie błąd!**
+- Aplikacja używa systemu seed dla powtarzalności
+- Kliknij "🔄 Nowy zestaw" aby wygenerować inne zadania
+- Te same ustawienia zawsze dają te same zadania (deterministyczne)
+
+### Konfiguracja się nie zapisuje
+
+- Sprawdź czy przeglądarka ma włączone localStorage
+- Konfiguracja zapisuje się automatycznie przy każdej zmianie
+- Działa tylko w tej samej przeglądarce
 
 ## 📄 Licencja
 

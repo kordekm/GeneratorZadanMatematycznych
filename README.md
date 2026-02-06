@@ -1,6 +1,26 @@
 # Generator Kart Pracy z Matematyki - Działania w Słupkach
 
-Aplikacja webowa do generowania spersonalizowanych kart pracy z zadaniami z dodawania, odejmowania, mnożenia i dzielenia pisemnego (w słupkach) dla dzieci.
+Aplikacja klient-serwer do generowania spersonalizowanych kart pracy z zadaniami z dodawania, odejmowania, mnożenia i dzielenia pisemnego (w słupkach) dla dzieci.
+
+## 🏗️ Architektura
+
+Projekt składa się z dwóch niezależnych serwisów:
+
+- **Backend** (`backend/`) - Node.js + Express, generowanie zadań, automatyczne drukowanie
+- **Frontend** (`frontend/`) - React + Vite, interfejs konfiguracyjny i podgląd
+
+### Backend
+- API REST do generowania zadań
+- Zapis/odczyt konfiguracji z pliku JSON
+- Automatyczne drukowanie przy pierwszym uruchomieniu każdego dnia
+- Generowanie PDF (wkhtmltopdf lub chromium)
+- Drukowanie przez `lp` (Linux)
+
+### Frontend
+- Interfejs konfiguracyjny
+- Podgląd zadań na żywo
+- Eksport/import konfiguracji do/z pliku JSON
+- Zapis konfiguracji na serwerze
 
 ## 🎯 Funkcje
 
@@ -8,40 +28,16 @@ Aplikacja webowa do generowania spersonalizowanych kart pracy z zadaniami z doda
 
 Każdy typ działania można włączyć/wyłączyć niezależnie:
 
-- **➕ Dodawanie w słupku**
-  - Liczba zadań (0-100)
-  - Zakres wartości (min/max)
-  - Liczba składników (2-8)
-  - Niezależna konfiguracja dla każdego zestawu
-
-- **➖ Odejmowanie w słupku**
-  - Liczba zadań (0-100)
-  - Zakres wartości (min/max)
-  - Opcja wyników ujemnych
-  - Zawsze 2 składniki
-
-- **✖️ Mnożenie w słupku**
-  - Liczba zadań (0-100)
-  - Liczba cyfr czynnika 1 (1-4 cyfry)
-  - Liczba cyfr czynnika 2 (1-3 cyfry)
-  - Niezależne od globalnych ustawień zakresu
-
-- **➗ Dzielenie w słupku**
-  - Liczba zadań (0-100)
-  - Liczba cyfr dzielnej (2-4 cyfry)
-  - Liczba cyfr dzielnika (1-2 cyfry)
-  - Opcja zezwolenia na resztę z dzielenia
-  - Format klasycznego "kącika" ze wszystkimi krokami
-  - Nie uwzględnia globalnego trybu przeniesień
+- **➕ Dodawanie w słupku** - zakres wartości, liczba składników (2-8)
+- **➖ Odejmowanie w słupku** - zakres wartości, opcja wyników ujemnych
+- **✖️ Mnożenie w słupku** - liczba cyfr czynników
+- **➗ Dzielenie w słupku** - liczba cyfr dzielnej/dzielnika, opcja reszty
 
 ### Tryby przeniesień/pożyczania
 
-Globalne ustawienie dla dodawania, odejmowania i mnożenia:
 - **Bez przeniesień/pożyczania** - tylko proste działania
 - **Musi być przeniesienie/pożyczanie** - wymusza trudniejsze zadania
 - **Dowolne** - losowy mix
-
-**Uwaga:** Dzielenie nie uwzględnia tego trybu - zawsze generowane jako standardowe dzielenie pisemne.
 
 ### Personalizacja wyglądu
 
@@ -49,46 +45,54 @@ Globalne ustawienie dla dodawania, odejmowania i mnożenia:
 - Kratka zeszytowa (wyłączona/jasna/średnia)
 - Liczba kolumn (1-4)
 - Numerowanie zadań
-- Automatyczna paginacja
-- Dynamiczny nagłówek
 
 ## 📋 Wymagania
 
 - Node.js (wersja 18 lub nowsza)
-- npm lub yarn
+- npm
+- Do automatycznego drukowania: `wkhtmltopdf` lub `chromium` + skonfigurowana drukarka (Linux)
 
 ## 🚀 Instalacja
 
 ```bash
-# Sklonuj lub pobierz projekt
 cd GeneratorZadanMatematycznych
 
-# Zainstaluj zależności
-npm install
+# Zainstaluj zależności backendu
+cd backend && npm install && cd ..
+
+# Zainstaluj zależności frontendu
+cd frontend && npm install && cd ..
 ```
 
 ## 💻 Uruchomienie
 
 ### Tryb deweloperski
 
+W dwóch osobnych terminalach:
+
 ```bash
+# Terminal 1 - Backend (port 3001)
+cd backend
+npm run dev
+
+# Terminal 2 - Frontend (port 5173)
+cd frontend
 npm run dev
 ```
 
-Aplikacja będzie dostępna pod adresem: `http://localhost:5173`
+Frontend automatycznie proxy'uje requesty `/api` do backendu.
 
 ### Build produkcyjny
 
 ```bash
+# Backend
+cd backend
 npm run build
-```
+npm start
 
-Zbudowane pliki znajdą się w katalogu `dist/`.
-
-### Podgląd buildu produkcyjnego
-
-```bash
-npm run preview
+# Frontend
+cd frontend
+npm run build
 ```
 
 ## 📖 Jak używać

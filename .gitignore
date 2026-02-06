@@ -22,3 +22,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Backend data (runtime files)
+backend/data/last-print.txt
+backend/data/tasks.pdf
+backend/data/tmp-*.html

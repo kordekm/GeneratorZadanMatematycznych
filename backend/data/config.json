@@ -1,0 +1,39 @@
+{
+  "seed": "12345",
+  "carryMode": "any",
+  "fontSize": 32,
+  "gridMode": "light",
+  "orientation": "portrait",
+  "columns": 4,
+  "showTaskNumbers": true,
+  "showAnswers": "none",
+  "showHeader": true,
+  "addition": {
+    "enabled": true,
+    "count": 20,
+    "minTerms": 2,
+    "maxTerms": 2,
+    "minValue": 10,
+    "maxValue": 99
+  },
+  "subtraction": {
+    "enabled": false,
+    "count": 0,
+    "minValue": 10,
+    "maxValue": 99,
+    "allowNegativeResults": false
+  },
+  "multiplication": {
+    "enabled": false,
+    "count": 0,
+    "factor1Digits": 3,
+    "factor2Digits": 2
+  },
+  "division": {
+    "enabled": false,
+    "count": 0,
+    "dividendDigits": 3,
+    "divisorDigits": 1,
+    "allowRemainder": true
+  }
+}

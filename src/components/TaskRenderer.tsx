@@ -63,6 +63,8 @@ export function TaskRenderer({ task, fontSize, showNumber, gridMode, showAnswers
       }
       
       // Build rows for division display
+      const dividendLength = dividend.toString().length;
+      
       const divisionRows = [
         {
           number: quotient,
@@ -86,15 +88,18 @@ export function TaskRenderer({ task, fontSize, showNumber, gridMode, showAnswers
         }
       ];
       
-      // Add intermediate steps
+      // Add intermediate steps with proper offset calculation
       steps.forEach((step) => {
+        const rightAlignPosition = step.position + 1;
+        const offset = Math.max(0, dividendLength - rightAlignPosition);
+        
         if (step.type === 'subtract') {
           divisionRows.push({
             number: step.value,
             operation: '-',
             isResult: false,
             isPartial: true,
-            offset: 0,
+            offset: offset,
             hasLineBelow: true
           } as any);
         } else if (step.type === 'result') {
@@ -103,7 +108,7 @@ export function TaskRenderer({ task, fontSize, showNumber, gridMode, showAnswers
             operation: null,
             isResult: false,
             isPartial: true,
-            offset: 0,
+            offset: offset,
             hasLineBelow: false
           } as any);
         }
@@ -206,16 +211,20 @@ export function TaskRenderer({ task, fontSize, showNumber, gridMode, showAnswers
           const isDivisionDividend = (row as any).isDivisionDividend;
           const divisor = (row as any).divisor;
 
+          const contentCells = digits.length + row.offset;
+          const lineStartPosition = fontSize + (leftPadding * cellWidth);
+          const lineExtension = cellWidth * 0.3;
+          const lineWidth = (contentCells * cellWidth) + lineExtension;
+
           return (
-            <div
-              key={rowIdx}
-              style={{
-                display: 'grid',
-                gridTemplateColumns: `${fontSize}px repeat(${totalCells}, ${cellWidth}px)`,
-                marginBottom: row.hasLineBelow ? '2px' : '0',
-                borderBottom: row.hasLineBelow ? '2px solid black' : 'none',
-              }}
-            >
+            <div key={rowIdx} style={{ position: 'relative' }}>
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: `${fontSize}px repeat(${totalCells}, ${cellWidth}px)`,
+                  marginBottom: row.hasLineBelow ? '2px' : '0',
+                }}
+              >
               {/* Operation cell - special handling for division */}
               <div
                 style={{
@@ -308,6 +317,20 @@ export function TaskRenderer({ task, fontSize, showNumber, gridMode, showAnswers
                   }}
                 />
               ))}
+              </div>
+              
+              {/* Horizontal line below content */}
+              {row.hasLineBelow && (
+                <div
+                  style={{
+                    position: 'absolute',
+                    left: `${lineStartPosition}px`,
+                    bottom: '2px',
+                    width: `${lineWidth}px`,
+                    borderBottom: '2px solid black',
+                  }}
+                />
+              )}
             </div>
           );
         })}

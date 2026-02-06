@@ -4,18 +4,32 @@ export type AnswerMode = 'none' | 'separate-page' | 'separate-pdf';
 export type Orientation = 'portrait' | 'landscape';
 export type OperationType = 'addition' | 'subtraction' | 'subtraction-only';
 
-export interface OperationConfig {
-    addition: number;
-    subtraction: number;
+export interface AdditionConfig {
+    enabled: boolean;
+    count: number;
+    minTerms: number;
+    maxTerms: number;
+    minValue: number;
+    maxValue: number;
+}
+
+export interface SubtractionConfig {
+    enabled: boolean;
+    count: number;
+    minValue: number;
+    maxValue: number;
+    allowNegativeResults: boolean;
+}
+
+export interface MultiplicationConfig {
+    enabled: boolean;
+    count: number;
+    factor1Digits: number;
+    factor2Digits: number;
 }
 
 export interface Config {
-    minValue: number;
-    maxValue: number;
-    minTerms: number;
-    maxTerms: number;
-    taskCount: number;
-    carryMode: CarryMode;
+    // Visual settings
     fontSize: number;
     gridMode: GridMode;
     orientation: Orientation;
@@ -23,15 +37,21 @@ export interface Config {
     showTaskNumbers: boolean;
     showAnswers: AnswerMode;
     showHeader: boolean;
+
+    // Logic settings
+    carryMode: CarryMode;
     seed: string;
-    operations: OperationConfig;
-    allowNegativeResults: boolean;
+
+    // Operations
+    addition: AdditionConfig;
+    subtraction: SubtractionConfig;
+    multiplication: MultiplicationConfig;
 }
 
 export interface Task {
     id: number;
     numbers: number[];
-    operations: ('+' | '-')[];
+    operations: ('+' | '-' | '*')[];
     answer: number;
 }
 

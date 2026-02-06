@@ -47,15 +47,7 @@ export function useTaskGenerator(): UseTaskGeneratorResult {
 
         // Prepare message data
         const message = {
-            count: config.taskCount,
-            minValue: config.minValue,
-            maxValue: config.maxValue,
-            minTerms: config.minTerms,
-            maxTerms: config.maxTerms,
-            carryMode: config.carryMode,
-            seed: config.seed,
-            operationConfig: config.operations,
-            allowNegativeResults: config.allowNegativeResults
+            config
         };
 
         workerRef.current.postMessage(message);

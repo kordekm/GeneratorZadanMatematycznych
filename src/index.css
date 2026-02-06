@@ -63,8 +63,7 @@ body {
   }
   
   .overflow-y-auto,
-  .h-full,
-  [style*="height"] {
+  .h-full {
     overflow: visible !important;
     height: auto !important;
     max-height: none !important;
@@ -121,5 +120,28 @@ body {
   * {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
+  }
+  
+  /* Preserve CSS Grid structure in print */
+  [style*="display: grid"] {
+    display: grid !important;
+  }
+  
+  /* Ensure borders are visible */
+  [style*="border"] {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}
+
+
+@media print {
+  /* Make grid borders visible in print while maintaining distinction */
+  [style*="border: 1px solid #d0d0d0"] {
+    border: 1px solid #a0a0a0 !important;
+  }
+  
+  [style*="border: 1px solid #808080"] {
+    border: 1px solid #404040 !important;
   }
 }

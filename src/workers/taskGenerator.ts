@@ -1,43 +1,17 @@
-import type { CarryMode, OperationConfig } from '../types';
+import type { Config } from '../types';
 import { generateTasks, GeneratorError } from '../utils/generator';
 
+// Pass the full config object to ensure we have all settings including multiplication
 export interface GeneratorMessage {
-    count: number;
-    minValue: number;
-    maxValue: number;
-    minTerms: number;
-    maxTerms: number;
-    carryMode: CarryMode;
-    seed: string;
-    operationConfig: OperationConfig;
-    allowNegativeResults: boolean;
+    config: Config;
 }
 
 self.onmessage = (e: MessageEvent<GeneratorMessage>) => {
     try {
-        const {
-            count,
-            minValue,
-            maxValue,
-            minTerms,
-            maxTerms,
-            carryMode,
-            seed,
-            operationConfig,
-            allowNegativeResults
-        } = e.data;
+        const { config } = e.data;
 
-        const tasks = generateTasks(
-            count,
-            minValue,
-            maxValue,
-            minTerms,
-            maxTerms,
-            carryMode,
-            seed,
-            operationConfig,
-            allowNegativeResults
-        );
+        // generateTasks now expects the full config object.
+        const tasks = generateTasks(config);
 
         self.postMessage({ type: 'SUCCESS', tasks });
     } catch (error) {

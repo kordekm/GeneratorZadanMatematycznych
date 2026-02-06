@@ -1,4 +1,4 @@
-import React from 'react';
+import { useMemo } from 'react';
 import type { Task } from '../types';
 
 interface TaskRendererProps {
@@ -6,34 +6,95 @@ interface TaskRendererProps {
   fontSize: number;
   showNumber: boolean;
   gridMode: 'off' | 'light' | 'medium';
+  showAnswers: boolean;
 }
 
-export function TaskRenderer({ task, fontSize, showNumber, gridMode }: TaskRendererProps) {
+export function TaskRenderer({ task, fontSize, showNumber, gridMode, showAnswers }: TaskRendererProps) {
   const lineHeight = fontSize * 1.4;
-  
-  const borderColor = gridMode === 'light' ? '#d0d0d0' : gridMode === 'medium' ? '#a0a0a0' : 'transparent';
-  const borderStyle = gridMode !== 'off' ? `1px solid ${borderColor}` : 'none';
-  
-  // Liczba kolumn = długość wyniku (najdłuższa liczba)
-  const resultDigits = Math.abs(task.answer).toString().length + (task.answer < 0 ? 1 : 0);
-  const maxDigits = Math.max(resultDigits, ...task.numbers.map(n => Math.abs(n).toString().length));
-  
-  // Przygotuj wszystkie wiersze (cyfry składników + wynik)
-  const allRows = [
-    ...task.numbers.map((num, idx) => ({
-      isLast: idx === task.numbers.length - 1,
-      number: num,
-      isResult: false,
-      operation: idx === 0 ? null : task.operations[idx - 1],
-    })),
-    {
-      isLast: false,
-      number: task.answer,
-      isResult: true,
-      operation: null,
+  const cellWidth = fontSize * 0.65;
+
+  // Check if this is a multiplication task
+  const isMultiplication = task.operations.includes('*');
+
+  const rows = useMemo(() => {
+    if (!isMultiplication) {
+      // Standard Add/Sub Logic
+      return [
+        ...task.numbers.map((num, idx) => ({
+            number: num,
+            operation: idx === 0 ? null : task.operations[idx - 1],
+            isResult: false,
+            isPartial: false,
+            offset: 0,
+            hasLineBelow: idx === task.numbers.length - 1
+        })),
+        {
+            number: task.answer,
+            operation: null,
+            isResult: true,
+            isPartial: false,
+            offset: 0,
+            hasLineBelow: false
+        }
+      ];
+    } else {
+        // Multiplication Logic
+        const n1 = task.numbers[0];
+        const n2 = task.numbers[1];
+        const n2Digits = Math.abs(n2).toString().split('').map(Number).reverse();
+
+        const partials = n2Digits.map((d, i) => ({
+            val: n1 * d,
+            offset: i
+        }));
+
+        const resultRows = [
+            { number: n1, operation: null, isResult: false, isPartial: false, offset: 0, hasLineBelow: false },
+            { number: n2, operation: '*', isResult: false, isPartial: false, offset: 0, hasLineBelow: true }
+        ];
+
+        if (partials.length > 1) {
+             partials.forEach((p, idx) => {
+                 resultRows.push({
+                     number: p.val,
+                     operation: null,
+                     isResult: false,
+                     isPartial: true,
+                     offset: p.offset,
+                     hasLineBelow: idx === partials.length - 1
+                 });
+             });
+        }
+
+        resultRows.push({
+            number: task.answer,
+            operation: null,
+            isResult: true,
+            isPartial: false,
+            offset: 0,
+            hasLineBelow: false
+        });
+
+        return resultRows;
     }
-  ];
-  
+  }, [task, isMultiplication]);
+
+  let maxGridWidth = 0;
+  rows.forEach(r => {
+      const len = r.number.toString().length;
+      maxGridWidth = Math.max(maxGridWidth, len + r.offset);
+  });
+
+  // Determine border style based on gridMode
+  const getBorderStyle = () => {
+    if (gridMode === 'off') return 'none';
+    if (gridMode === 'light') return '1px solid #d0d0d0';  // Jasna kratka - jasny szary
+    if (gridMode === 'medium') return '1px solid #808080'; // Średnia kratka - ciemny szary
+    return 'none';
+  };
+
+  const cellBorder = getBorderStyle();
+
   return (
     <div className="mb-6">
       {showNumber && (
@@ -41,78 +102,93 @@ export function TaskRenderer({ task, fontSize, showNumber, gridMode }: TaskRende
           {task.id}.
         </div>
       )}
-      <table 
-        style={{
-          borderCollapse: 'collapse',
-          fontFamily: 'Roboto Mono, monospace',
-          fontSize,
-        }}
-      >
-        <tbody>
-          {allRows.map((row, rowIdx) => {
-            const numStr = row.number.toString();
-            const digits = numStr.split('');
-            const paddingCount = Math.max(0, maxDigits - digits.length);
-            
-            return (
-              <React.Fragment key={rowIdx}>
-                <tr>
-                  <td 
-                    style={{ 
-                      textAlign: 'center',
-                      width: `${fontSize}px`,
-                      height: `${lineHeight}px`,
-                      border: 'none',
-                      padding: 0,
-                    }}
-                  >
-                    {row.isLast && !row.isResult && row.operation}
-                  </td>
-                  {/* Puste komórki po lewej stronie */}
-                  {Array(paddingCount).fill(0).map((_, i) => (
-                    <td 
-                      key={`pad-${i}`}
-                      style={{ 
-                        width: `${fontSize * 0.65}px`,
-                        height: `${lineHeight}px`,
-                        border: borderStyle,
-                        padding: 0,
-                        textAlign: 'center',
-                        color: row.isResult ? 'white' : 'inherit',
-                      }}
-                    >
-                      {'\u00A0'}
-                    </td>
-                  ))}
-                  {/* Cyfry */}
-                  {digits.map((digit, i) => (
-                    <td 
-                      key={i}
-                      style={{ 
-                        width: `${fontSize * 0.65}px`,
-                        height: `${lineHeight}px`,
-                        border: borderStyle,
-                        padding: 0,
-                        textAlign: 'center',
-                        color: row.isResult ? 'white' : 'inherit',
-                      }}
-                    >
-                      {digit}
-                    </td>
-                  ))}
-                </tr>
-                {row.isLast && !row.isResult && (
-                  <tr>
-                    <td colSpan={maxDigits + 1} style={{ padding: 0 }}>
-                      <div style={{ borderTop: '2px solid black', margin: '2px 0' }} />
-                    </td>
-                  </tr>
-                )}
-              </React.Fragment>
-            );
-          })}
-        </tbody>
-      </table>
+      
+      {/* CSS Grid implementation */}
+      <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize }}>
+        {rows.map((row, rowIdx) => {
+          const numStr = Math.abs(row.number).toString();
+          const digits = numStr.split('');
+          const totalCells = maxGridWidth;
+          const leftPadding = Math.max(0, totalCells - (digits.length + row.offset));
+          
+          const shouldHideContent = (row.isResult || row.isPartial) && !showAnswers;
+
+          return (
+            <div
+              key={rowIdx}
+              style={{
+                display: 'grid',
+                gridTemplateColumns: `${fontSize}px repeat(${totalCells}, ${cellWidth}px)`,
+                marginBottom: row.hasLineBelow ? '2px' : '0',
+                borderBottom: row.hasLineBelow ? '2px solid black' : 'none',
+              }}
+            >
+              {/* Operation cell */}
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  height: `${lineHeight}px`,
+                }}
+              >
+                {!row.isResult && !row.isPartial && row.operation}
+              </div>
+
+              {/* Left padding cells */}
+              {Array(leftPadding).fill(0).map((_, i) => (
+                <div
+                  key={`pad-left-${i}`}
+                  style={{
+                    border: cellBorder,
+                    height: `${lineHeight}px`,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxSizing: 'border-box',
+                  }}
+                >
+                  {'\u00A0'}
+                </div>
+              ))}
+
+              {/* Digit cells */}
+              {digits.map((digit, i) => (
+                <div
+                  key={`digit-${i}`}
+                  style={{
+                    border: cellBorder,
+                    height: `${lineHeight}px`,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: shouldHideContent ? 'transparent' : 'inherit',
+                    boxSizing: 'border-box',
+                  }}
+                >
+                  {digit}
+                </div>
+              ))}
+
+              {/* Right padding (offset) cells */}
+              {Array(row.offset).fill(0).map((_, i) => (
+                <div
+                  key={`pad-right-${i}`}
+                  style={{
+                    border: cellBorder,
+                    height: `${lineHeight}px`,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: 'transparent',
+                    boxSizing: 'border-box',
+                  }}
+                />
+              ))}
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }

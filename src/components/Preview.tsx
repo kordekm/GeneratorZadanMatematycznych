@@ -47,6 +47,7 @@ export function Preview({ config, tasks }: PreviewProps) {
                   fontSize={config.fontSize}
                   showNumber={config.showTaskNumbers}
                   gridMode={config.gridMode}
+                  showAnswers={config.showAnswers !== 'none'}
                 />
               ))}
             </div>

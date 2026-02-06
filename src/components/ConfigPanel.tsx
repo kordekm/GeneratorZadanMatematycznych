@@ -1,6 +1,7 @@
 import type { Config, ValidationError } from '../types';
 import { AdditionConfig } from './config/AdditionConfig';
 import { AppearanceConfig } from './config/AppearanceConfig';
+import { DivisionConfig } from './config/DivisionConfig';
 import { MultiplicationConfigPanel } from './config/MultiplicationConfig';
 import { SubtractionConfig } from './config/SubtractionConfig';
 
@@ -19,6 +20,7 @@ export function ConfigPanel({ config, onChange, errors }: ConfigPanelProps) {
         <AdditionConfig config={config} onChange={onChange} />
         <SubtractionConfig config={config} onChange={onChange} />
         <MultiplicationConfigPanel config={config} onChange={onChange} />
+        <DivisionConfig config={config} onChange={onChange} />
         <AppearanceConfig config={config} onChange={onChange} errors={errors} />
       </div>
     </div>

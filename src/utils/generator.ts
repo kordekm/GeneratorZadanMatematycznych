@@ -209,7 +209,7 @@ function generateOperations(
     return ops;
 }
 
-function calculateAnswer(numbers: number[], operations: ('+' | '-' | '*')[]): number {
+function calculateAnswer(numbers: number[], operations: ('+' | '-' | '*' | '÷')[]): number {
     let result = numbers[0];
     for (let i = 1; i < numbers.length; i++) {
         const op = operations[i - 1];
@@ -219,6 +219,8 @@ function calculateAnswer(numbers: number[], operations: ('+' | '-' | '*')[]): nu
             result -= numbers[i];
         } else if (op === '*') {
             result *= numbers[i];
+        } else if (op === '÷') {
+            result = Math.floor(result / numbers[i]);
         }
     }
     return result;
@@ -277,6 +279,46 @@ function generateMultiplicationNumbers(
     ];
 }
 
+function generateDivisionNumbers(
+    rng: () => number,
+    dividendDigits: number,
+    divisorDigits: number,
+    allowRemainder: boolean
+): number[] {
+    const minDivisor = Math.pow(10, divisorDigits - 1);
+    const maxDivisor = Math.pow(10, divisorDigits) - 1;
+
+    if (!allowRemainder) {
+        // Generate divisor and quotient, then calculate dividend
+        const divisor = randomIntInclusive(rng, minDivisor, maxDivisor);
+
+        // Calculate quotient range to ensure dividend has correct number of digits
+        const minDividend = Math.pow(10, dividendDigits - 1);
+        const maxDividend = Math.pow(10, dividendDigits) - 1;
+
+        const minQuotient = Math.ceil(minDividend / divisor);
+        const maxQuotient = Math.floor(maxDividend / divisor);
+
+        if (minQuotient > maxQuotient) {
+            return []; // Cannot generate valid numbers
+        }
+
+        const quotient = randomIntInclusive(rng, minQuotient, maxQuotient);
+        const dividend = divisor * quotient;
+
+        return [dividend, divisor];
+    } else {
+        // Generate random dividend and divisor
+        const minDividend = Math.pow(10, dividendDigits - 1);
+        const maxDividend = Math.pow(10, dividendDigits) - 1;
+
+        const dividend = randomIntInclusive(rng, minDividend, maxDividend);
+        const divisor = randomIntInclusive(rng, minDivisor, maxDivisor);
+
+        return [dividend, divisor];
+    }
+}
+
 function hasMultiplicationCarry(n1: number, n2: number): boolean {
     const digits1 = getDigits(n1); // reversed [ones, tens...]
     const digits2 = getDigits(n2);
@@ -314,7 +356,7 @@ export function generateTasks(config: Config): Task[] {
     const TIMEOUT_MS = 5000;
 
     // Build a flat list of operations to perform
-    const plannedTasks: { type: 'addition' | 'subtraction' | 'multiplication' }[] = [];
+    const plannedTasks: { type: 'addition' | 'subtraction' | 'multiplication' | 'division' }[] = [];
 
     // Addition
     if (config.addition.enabled) {
@@ -328,6 +370,10 @@ export function generateTasks(config: Config): Task[] {
     if (config.multiplication.enabled) {
         for (let i = 0; i < config.multiplication.count; i++) plannedTasks.push({ type: 'multiplication' });
     }
+    // Division
+    if (config.division.enabled) {
+        for (let i = 0; i < config.division.count; i++) plannedTasks.push({ type: 'division' });
+    }
 
     // Shuffle tasks so they are mixed
     shuffleInPlace(rng, plannedTasks);
@@ -338,7 +384,7 @@ export function generateTasks(config: Config): Task[] {
 
         let attempts = 0;
         let numbers: number[] = [];
-        let operations: ('+' | '-' | '*')[] = [];
+        let operations: ('+' | '-' | '*' | '÷')[] = [];
         let answer = 0;
         let found = false;
 
@@ -346,7 +392,20 @@ export function generateTasks(config: Config): Task[] {
 
         while (attempts < MAX_ATTEMPTS && !found) {
 
-            if (operationType === 'multiplication') {
+            if (operationType === 'division') {
+                operations = ['÷'];
+                numbers = generateDivisionNumbers(
+                    rng,
+                    config.division.dividendDigits,
+                    config.division.divisorDigits,
+                    config.division.allowRemainder
+                );
+
+                if (numbers.length > 0) {
+                    found = true;
+                }
+
+            } else if (operationType === 'multiplication') {
                 operations = ['*'];
                 numbers = generateMultiplicationNumbers(
                     rng,
@@ -414,7 +473,17 @@ export function generateTasks(config: Config): Task[] {
         }
 
         if (found) {
-            tasks.push({ id: taskId++, numbers, operations, answer });
+            const task: Task = { id: taskId++, numbers, operations, answer };
+
+            // Calculate remainder for division
+            if (operationType === 'division' && numbers.length === 2) {
+                const remainder = numbers[0] % numbers[1];
+                if (remainder > 0) {
+                    task.remainder = remainder;
+                }
+            }
+
+            tasks.push(task);
         }
     }
 

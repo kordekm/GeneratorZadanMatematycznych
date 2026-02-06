@@ -28,6 +28,14 @@ export interface MultiplicationConfig {
     factor2Digits: number;
 }
 
+export interface DivisionConfig {
+    enabled: boolean;
+    count: number;
+    dividendDigits: number;
+    divisorDigits: number;
+    allowRemainder: boolean;
+}
+
 export interface Config {
     // Visual settings
     fontSize: number;
@@ -46,13 +54,15 @@ export interface Config {
     addition: AdditionConfig;
     subtraction: SubtractionConfig;
     multiplication: MultiplicationConfig;
+    division: DivisionConfig;
 }
 
 export interface Task {
     id: number;
     numbers: number[];
-    operations: ('+' | '-' | '*')[];
+    operations: ('+' | '-' | '*' | '÷')[];
     answer: number;
+    remainder?: number;
 }
 
 export interface ValidationError {

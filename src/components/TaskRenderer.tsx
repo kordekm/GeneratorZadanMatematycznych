@@ -14,11 +14,103 @@ export function TaskRenderer({ task, fontSize, showNumber, gridMode, showAnswers
   const lineHeight = fontSize * 1.4;
   const cellWidth = fontSize * 0.65;
 
-  // Check if this is a multiplication task
+  // Check operation type
   const isMultiplication = task.operations.includes('*');
+  const isDivision = task.operations.includes('÷');
 
   const rows = useMemo(() => {
-    if (!isMultiplication) {
+    if (isDivision) {
+      // Division Logic - Long Division Format
+      const dividend = task.numbers[0];
+      const divisor = task.numbers[1];
+      const quotient = task.answer;
+      const remainder = task.remainder || 0;
+      
+      // Calculate division steps
+      const dividendStr = dividend.toString();
+      const steps: Array<{
+        type: 'subtract' | 'bring-down' | 'result';
+        value: number;
+        position: number;
+      }> = [];
+      
+      let currentDividend = 0;
+      
+      for (let i = 0; i < dividendStr.length; i++) {
+        currentDividend = currentDividend * 10 + parseInt(dividendStr[i]);
+        
+        if (currentDividend >= divisor) {
+          const digitQuotient = Math.floor(currentDividend / divisor);
+          const product = digitQuotient * divisor;
+          const stepRemainder = currentDividend - product;
+          
+          steps.push({
+            type: 'subtract',
+            value: product,
+            position: i
+          });
+          
+          if (stepRemainder > 0 || i < dividendStr.length - 1) {
+            steps.push({
+              type: 'result',
+              value: stepRemainder,
+              position: i
+            });
+          }
+          
+          currentDividend = stepRemainder;
+        }
+      }
+      
+      // Build rows for division display
+      const divisionRows = [
+        {
+          number: quotient,
+          operation: null,
+          isResult: true,
+          isPartial: false,
+          offset: 0,
+          hasLineBelow: true,
+          isDivisionQuotient: true,
+          remainder: remainder > 0 ? remainder : undefined
+        },
+        {
+          number: dividend,
+          operation: '÷',
+          isResult: false,
+          isPartial: false,
+          offset: 0,
+          hasLineBelow: false,
+          isDivisionDividend: true,
+          divisor: divisor
+        }
+      ];
+      
+      // Add intermediate steps
+      steps.forEach((step) => {
+        if (step.type === 'subtract') {
+          divisionRows.push({
+            number: step.value,
+            operation: '-',
+            isResult: false,
+            isPartial: true,
+            offset: 0,
+            hasLineBelow: true
+          } as any);
+        } else if (step.type === 'result') {
+          divisionRows.push({
+            number: step.value,
+            operation: null,
+            isResult: false,
+            isPartial: true,
+            offset: 0,
+            hasLineBelow: false
+          } as any);
+        }
+      });
+      
+      return divisionRows;
+    } else if (!isMultiplication) {
       // Standard Add/Sub Logic
       return [
         ...task.numbers.map((num, idx) => ({
@@ -78,7 +170,7 @@ export function TaskRenderer({ task, fontSize, showNumber, gridMode, showAnswers
 
         return resultRows;
     }
-  }, [task, isMultiplication]);
+  }, [task, isMultiplication, isDivision]);
 
   // Determine border style based on gridMode
   const getBorderStyle = () => {
@@ -91,7 +183,7 @@ export function TaskRenderer({ task, fontSize, showNumber, gridMode, showAnswers
   const cellBorder = getBorderStyle();
 
   return (
-    <div className="mb-6">
+    <div className="mb-6" style={{ marginRight: isDivision ? '60px' : '0' }}>
       {showNumber && (
         <div className="font-mono mb-2" style={{ fontSize: fontSize * 0.7 }}>
           {task.id}.
@@ -107,6 +199,12 @@ export function TaskRenderer({ task, fontSize, showNumber, gridMode, showAnswers
           const leftPadding = Math.max(0, totalCells - (digits.length + row.offset));
           
           const shouldHideContent = (row.isResult || row.isPartial) && !showAnswers;
+          
+          // Special handling for division quotient with remainder
+          const isDivisionQuotient = (row as any).isDivisionQuotient;
+          const divisionRemainder = (row as any).remainder;
+          const isDivisionDividend = (row as any).isDivisionDividend;
+          const divisor = (row as any).divisor;
 
           return (
             <div
@@ -118,7 +216,7 @@ export function TaskRenderer({ task, fontSize, showNumber, gridMode, showAnswers
                 borderBottom: row.hasLineBelow ? '2px solid black' : 'none',
               }}
             >
-              {/* Operation cell */}
+              {/* Operation cell - special handling for division */}
               <div
                 style={{
                   display: 'flex',
@@ -127,7 +225,7 @@ export function TaskRenderer({ task, fontSize, showNumber, gridMode, showAnswers
                   height: `${lineHeight}px`,
                 }}
               >
-                {!row.isResult && !row.isPartial && row.operation}
+                {isDivisionDividend ? '' : (!row.isResult && !row.isPartial && row.operation)}
               </div>
 
               {/* Left padding cells */}
@@ -148,22 +246,52 @@ export function TaskRenderer({ task, fontSize, showNumber, gridMode, showAnswers
               ))}
 
               {/* Digit cells */}
-              {digits.map((digit, i) => (
+              {digits.map((digit, i) => {
+                const isLastDigit = i === digits.length - 1;
+                const showDivisorHere = isLastDigit && isDivisionDividend && divisor !== undefined;
+                
+                return (
+                  <div
+                    key={`digit-${i}`}
+                    style={{
+                      border: cellBorder,
+                      height: `${lineHeight}px`,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: shouldHideContent ? 'transparent' : 'inherit',
+                      boxSizing: 'border-box',
+                      position: 'relative',
+                    }}
+                  >
+                    {digit}
+                    {showDivisorHere && (
+                      <span style={{ 
+                        position: 'absolute',
+                        left: '100%',
+                        whiteSpace: 'nowrap'
+                      }}>
+                        :{divisor}
+                      </span>
+                    )}
+                  </div>
+                );
+              })}
+              
+              {/* Display remainder for division quotient */}
+              {isDivisionQuotient && divisionRemainder !== undefined && !shouldHideContent && (
                 <div
-                  key={`digit-${i}`}
                   style={{
-                    border: cellBorder,
-                    height: `${lineHeight}px`,
+                    gridColumn: `span ${Math.max(1, totalCells - digits.length)}`,
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: 'center',
-                    color: shouldHideContent ? 'transparent' : 'inherit',
-                    boxSizing: 'border-box',
+                    paddingLeft: '8px',
+                    fontSize: fontSize * 0.9,
                   }}
                 >
-                  {digit}
+                  r. {divisionRemainder}
                 </div>
-              ))}
+              )}
 
               {/* Right padding (offset) cells */}
               {Array(row.offset).fill(0).map((_, i) => (

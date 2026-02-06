@@ -41,6 +41,13 @@ const DEFAULT_CONFIG: Config = {
     count: 0,
     factor1Digits: 3,
     factor2Digits: 2,
+  },
+  division: {
+    enabled: false,
+    count: 0,
+    dividendDigits: 3,
+    divisorDigits: 1,
+    allowRemainder: true
   }
 };
 
@@ -55,7 +62,8 @@ function App() {
         // Ensure nested objects are also merged properly
         addition: { ...DEFAULT_CONFIG.addition, ...savedConfig.addition },
         subtraction: { ...DEFAULT_CONFIG.subtraction, ...savedConfig.subtraction },
-        multiplication: { ...DEFAULT_CONFIG.multiplication, ...savedConfig.multiplication }
+        multiplication: { ...DEFAULT_CONFIG.multiplication, ...savedConfig.multiplication },
+        division: { ...DEFAULT_CONFIG.division, ...savedConfig.division }
       };
     }
     return DEFAULT_CONFIG;
@@ -100,11 +108,13 @@ function App() {
     const hasAddition = config.addition.count > 0;
     const hasSubtraction = config.subtraction.count > 0;
     const hasMultiplication = config.multiplication.enabled && config.multiplication.count > 0;
+    const hasDivision = config.division.enabled && config.division.count > 0;
     
     const activeOperations = [
         hasAddition && 'Dodawanie',
         hasSubtraction && 'Odejmowanie',
-        hasMultiplication && 'Mnożenie'
+        hasMultiplication && 'Mnożenie',
+        hasDivision && 'Dzielenie'
     ].filter(Boolean);
 
     if (activeOperations.length === 0) return 'Generator Kart Pracy - Działania w Słupkach';

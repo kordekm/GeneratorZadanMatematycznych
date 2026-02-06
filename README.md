@@ -1,6 +1,6 @@
 # Generator Kart Pracy z Matematyki - Działania w Słupkach
 
-Aplikacja webowa do generowania spersonalizowanych kart pracy z zadaniami z dodawania, odejmowania i mnożenia pisemnego (w słupkach) dla dzieci.
+Aplikacja webowa do generowania spersonalizowanych kart pracy z zadaniami z dodawania, odejmowania, mnożenia i dzielenia pisemnego (w słupkach) dla dzieci.
 
 ## 🎯 Funkcje
 
@@ -26,12 +26,22 @@ Każdy typ działania można włączyć/wyłączyć niezależnie:
   - Liczba cyfr czynnika 2 (1-3 cyfry)
   - Niezależne od globalnych ustawień zakresu
 
+- **➗ Dzielenie w słupku**
+  - Liczba zadań (0-100)
+  - Liczba cyfr dzielnej (2-4 cyfry)
+  - Liczba cyfr dzielnika (1-2 cyfry)
+  - Opcja zezwolenia na resztę z dzielenia
+  - Format klasycznego "kącika" ze wszystkimi krokami
+  - Nie uwzględnia globalnego trybu przeniesień
+
 ### Tryby przeniesień/pożyczania
 
-Globalne ustawienie dla wszystkich działań:
+Globalne ustawienie dla dodawania, odejmowania i mnożenia:
 - **Bez przeniesień/pożyczania** - tylko proste działania
 - **Musi być przeniesienie/pożyczanie** - wymusza trudniejsze zadania
 - **Dowolne** - losowy mix
+
+**Uwaga:** Dzielenie nie uwzględnia tego trybu - zawsze generowane jako standardowe dzielenie pisemne.
 
 ### Personalizacja wyglądu
 
@@ -84,7 +94,7 @@ npm run preview
 ## 📖 Jak używać
 
 1. **Wybierz rodzaje działań**:
-   - Włącz/wyłącz dodawanie, odejmowanie lub mnożenie przełącznikami
+   - Włącz/wyłącz dodawanie, odejmowanie, mnożenie lub dzielenie przełącznikami
    - Dla każdego typu ustaw liczbę zadań
    - Skonfiguruj parametry specyficzne dla danego działania
 
@@ -92,6 +102,7 @@ npm run preview
    - **Dodawanie**: zakres liczb (min/max), liczba składników (2-8)
    - **Odejmowanie**: zakres liczb (min/max), opcja wyników ujemnych
    - **Mnożenie**: liczba cyfr dla obu czynników (niezależnie od zakresu)
+   - **Dzielenie**: liczba cyfr dzielnej (2-4) i dzielnika (1-2), opcja reszty
 
 3. **Ustaw tryb przeniesień** (globalnie dla wszystkich działań):
    - Bez przeniesień/pożyczania
@@ -185,9 +196,19 @@ Generator symuluje działania kolumnami od prawej do lewej:
 - **Dodawanie**: włączone, 8 zadań, min: 100, max: 9999, składniki: 4-6
 - **Odejmowanie**: włączone, 6 zadań, min: 100, max: 9999, z wynikami ujemnymi
 - **Mnożenie**: włączone, 6 zadań, czynnik 1: 3 cyfry, czynnik 2: 2 cyfry
+- **Dzielenie**: włączone, 5 zadań, dzielna: 3 cyfry, dzielnik: 2 cyfry, z resztą
 - **Tryb**: Dowolne
 - **Czcionka**: 24px
 - **Kolumny**: 3
+
+### Zadania z dzieleniem - nauka dzielenia pisemnego
+
+- **Dodawanie**: wyłączone
+- **Odejmowanie**: wyłączone
+- **Mnożenie**: wyłączone
+- **Dzielenie**: włączone, 20 zadań, dzielna: 3 cyfry, dzielnik: 1 cyfra, z resztą
+- **Czcionka**: 36px
+- **Kolumny**: 2
 
 ## 🐛 Rozwiązywanie problemów
 
@@ -198,6 +219,7 @@ Generator symuluje działania kolumnami od prawej do lewej:
 - **Odejmowanie bez wyników ujemnych**: zwiększ zakres liczb (max musi być wystarczająco duże)
 - **Mnożenie z "bez przeniesień"**: bardzo trudne, spróbuj trybu "Dowolne"
 - **Zbyt wiele składników**: zmniejsz liczbę składników w dodawaniu
+- **Dzielenie bez reszty**: jeśli wyłączona opcja "Zezwól na resztę", może być trudno wygenerować zadania z niektórymi kombinacjami cyfr
 
 ### Brak zadań do wyświetlenia
 

@@ -115,24 +115,34 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <header className="bg-blue-600 text-white py-6 shadow-lg">
-        <div className="container mx-auto px-4">
+      <header className="bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 text-white py-8 shadow-lg relative overflow-hidden">
+        {/* Mathematical decorations */}
+        <div className="absolute inset-0 pointer-events-none">
+          <span className="absolute top-4 left-[10%] text-7xl opacity-20 font-bold text-white">+</span>
+          <span className="absolute top-8 right-[15%] text-6xl opacity-20 font-bold text-white">−</span>
+          <span className="absolute bottom-6 left-[25%] text-8xl opacity-15 font-bold text-white">×</span>
+          <span className="absolute bottom-4 right-[30%] text-6xl opacity-20 font-bold text-white">÷</span>
+          <span className="absolute top-1/2 left-[45%] text-5xl opacity-20 font-bold text-white">+</span>
+          <span className="absolute top-6 right-[45%] text-7xl opacity-15 font-bold text-white">×</span>
+        </div>
+        
+        <div className="container mx-auto px-4 relative z-10">
           <div className="flex justify-between items-center">
             <div>
               <h1 className="text-3xl font-bold">{getTitle()}</h1>
-              <p className="text-blue-100 mt-2">Twórz spersonalizowane karty pracy z działaniami pisemnymi</p>
+              <p className="text-white/90 mt-2">Twórz spersonalizowane karty pracy z działaniami pisemnymi</p>
             </div>
             <div className="flex items-center gap-3">
               <button
                 onClick={handleNewSet}
-                className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-400 font-semibold shadow-lg transition no-print"
+                className="px-6 py-3 bg-white/20 backdrop-blur-sm border-2 border-white/30 text-white rounded-lg hover:bg-white/30 font-semibold shadow-lg transition no-print"
               >
                 🔄 Nowy zestaw
               </button>
               <button
                 onClick={handlePrint}
                 disabled={tasks.length === 0 || errors.length > 0}
-                className="px-6 py-3 bg-white text-blue-600 rounded-lg hover:bg-blue-50 disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed font-semibold shadow-lg transition no-print"
+                className="px-6 py-3 bg-white text-purple-600 rounded-lg hover:bg-gray-50 disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed font-semibold shadow-lg transition no-print"
               >
                 🖨️ Drukuj zadania
               </button>

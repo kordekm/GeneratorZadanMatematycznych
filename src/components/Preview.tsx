@@ -1,5 +1,5 @@
 import type { Config, Task } from '../types';
-import { calculateLayoutMetrics, getMaxTermsCount, paginateTasks } from '../utils/layout';
+import { calculateLayoutMetrics, getMaxGridWidth, getMaxLineCount, paginateTasks } from '../utils/layout';
 import { TaskRenderer } from './TaskRenderer';
 
 interface PreviewProps {
@@ -16,8 +16,8 @@ export function Preview({ config, tasks }: PreviewProps) {
     );
   }
   
-  const maxTerms = getMaxTermsCount(tasks);
-  const metrics = calculateLayoutMetrics(config, maxTerms);
+  const maxLines = getMaxLineCount(tasks);
+  const metrics = calculateLayoutMetrics(config, maxLines);
   const pages = paginateTasks(tasks, metrics.tasksPerPage);
   
   return (
@@ -40,16 +40,20 @@ export function Preview({ config, tasks }: PreviewProps) {
                 gridTemplateColumns: `repeat(${config.columns}, 1fr)`,
               }}
             >
-              {page.tasks.map((task) => (
-                <TaskRenderer
-                  key={task.id}
-                  task={task}
-                  fontSize={config.fontSize}
-                  showNumber={config.showTaskNumbers}
-                  gridMode={config.gridMode}
-                  showAnswers={config.showAnswers !== 'none'}
-                />
-              ))}
+              {(() => {
+                const maxGridWidth = getMaxGridWidth(page.tasks);
+                return page.tasks.map((task) => (
+                  <TaskRenderer
+                    key={task.id}
+                    task={task}
+                    fontSize={config.fontSize}
+                    showNumber={config.showTaskNumbers}
+                    gridMode={config.gridMode}
+                    showAnswers={config.showAnswers !== 'none'}
+                    maxGridWidth={maxGridWidth}
+                  />
+                ));
+              })()}
             </div>
           </div>
         ))}

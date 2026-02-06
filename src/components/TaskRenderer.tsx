@@ -7,9 +7,10 @@ interface TaskRendererProps {
   showNumber: boolean;
   gridMode: 'off' | 'light' | 'medium';
   showAnswers: boolean;
+  maxGridWidth: number;
 }
 
-export function TaskRenderer({ task, fontSize, showNumber, gridMode, showAnswers }: TaskRendererProps) {
+export function TaskRenderer({ task, fontSize, showNumber, gridMode, showAnswers, maxGridWidth }: TaskRendererProps) {
   const lineHeight = fontSize * 1.4;
   const cellWidth = fontSize * 0.65;
 
@@ -78,12 +79,6 @@ export function TaskRenderer({ task, fontSize, showNumber, gridMode, showAnswers
         return resultRows;
     }
   }, [task, isMultiplication]);
-
-  let maxGridWidth = 0;
-  rows.forEach(r => {
-      const len = r.number.toString().length;
-      maxGridWidth = Math.max(maxGridWidth, len + r.offset);
-  });
 
   // Determine border style based on gridMode
   const getBorderStyle = () => {

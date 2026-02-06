@@ -72,29 +72,29 @@ export function AdditionConfig({ config, onChange }: AdditionConfigProps) {
                 </div>
             </div>
 
-            <div className="space-y-2">
-                 <label className="block text-sm font-medium text-gray-700">Liczba składników</label>
-                 <div className="flex items-center gap-2">
+            <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                    <label className="block text-sm font-medium text-gray-700">Liczba składników min</label>
                     <input
                         type="number"
                         min={2}
                         max={8}
                         value={config.addition.minTerms}
                         onChange={(e) => handleChange('minTerms', parseInt(e.target.value) || 2)}
-                        className="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500"
-                        placeholder="Min"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500"
                     />
-                    <span className="text-gray-500">-</span>
+                </div>
+                <div className="space-y-2">
+                    <label className="block text-sm font-medium text-gray-700">Liczba składników max</label>
                     <input
                         type="number"
                         min={2}
                         max={8}
                         value={config.addition.maxTerms}
                         onChange={(e) => handleChange('maxTerms', parseInt(e.target.value) || 2)}
-                        className="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500"
-                        placeholder="Max"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500"
                     />
-                 </div>
+                </div>
             </div>
         </div>
       )}

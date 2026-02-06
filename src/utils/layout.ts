@@ -28,7 +28,7 @@ function pxToPt(px: number): number {
     return px * 0.75;
 }
 
-export function calculateLayoutMetrics(config: Config, maxTermsInTasks: number): LayoutMetrics {
+export function calculateLayoutMetrics(config: Config, maxLinesInTasks: number): LayoutMetrics {
     const pageWidth = config.orientation === 'portrait' ? A4_WIDTH_PT : A4_HEIGHT_PT;
     const pageHeight = config.orientation === 'portrait' ? A4_HEIGHT_PT : A4_WIDTH_PT;
 
@@ -43,7 +43,7 @@ export function calculateLayoutMetrics(config: Config, maxTermsInTasks: number):
     const fontSizePt = pxToPt(config.fontSize);
     const lineHeight = fontSizePt * LINE_HEIGHT_MULTIPLIER;
 
-    const linesPerTask = maxTermsInTasks + 2;
+    const linesPerTask = maxLinesInTasks;
     const taskHeight = (linesPerTask * lineHeight) + TASK_BOTTOM_MARGIN_PT;
 
     const tasksPerColumn = Math.floor(contentHeight / taskHeight);
@@ -83,6 +83,58 @@ export function paginateTasks(tasks: Task[], tasksPerPage: number): PageLayout[]
     return pages;
 }
 
-export function getMaxTermsCount(tasks: Task[]): number {
-    return Math.max(...tasks.map(t => t.numbers.length));
+export function getTaskLineCount(task: Task): number {
+    const isMultiplication = task.operations.includes('*');
+
+    if (!isMultiplication) {
+        return task.numbers.length + 1;
+    } else {
+        const n2 = task.numbers[1];
+        const n2Digits = Math.abs(n2).toString().length;
+
+        if (n2Digits > 1) {
+            return 2 + n2Digits + 1;
+        } else {
+            return 2 + 1;
+        }
+    }
+}
+
+export function getMaxLineCount(tasks: Task[]): number {
+    if (tasks.length === 0) return 2;
+    return Math.max(...tasks.map(t => getTaskLineCount(t)));
+}
+
+export function getTaskGridWidth(task: Task): number {
+    const isMultiplication = task.operations.includes('*');
+
+    if (!isMultiplication) {
+        // For addition/subtraction, just find the longest number
+        return Math.max(...task.numbers.map(n => Math.abs(n).toString().length), task.answer.toString().length);
+    } else {
+        // For multiplication, account for partial results with offsets
+        const n1 = task.numbers[0];
+        const n2 = task.numbers[1];
+        const n2Digits = Math.abs(n2).toString().split('').map(Number).reverse();
+
+        let maxWidth = Math.max(
+            Math.abs(n1).toString().length,
+            Math.abs(n2).toString().length,
+            task.answer.toString().length
+        );
+
+        // Check partial results with offsets
+        n2Digits.forEach((d, i) => {
+            const partialVal = n1 * d;
+            const partialWidth = Math.abs(partialVal).toString().length + i;
+            maxWidth = Math.max(maxWidth, partialWidth);
+        });
+
+        return maxWidth;
+    }
+}
+
+export function getMaxGridWidth(tasks: Task[]): number {
+    if (tasks.length === 0) return 1;
+    return Math.max(...tasks.map(t => getTaskGridWidth(t)));
 }

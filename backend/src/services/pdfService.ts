@@ -1,30 +1,80 @@
 import { exec } from 'child_process';
-import { promisify } from 'util';
 import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { promisify } from 'util';
 import type { Config, Task } from '../types.js';
 
 const execAsync = promisify(exec);
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const TEMPLATES_DIR = path.resolve(__dirname, '../../templates');
 const DATA_DIR = path.resolve(__dirname, '../../data');
 
-function getTaskLineCount(task: Task): number {
-    const isMultiplication = task.operations.includes('*');
+// A4 layout constants (in points, 1pt = 1/72 inch)
+const A4_WIDTH_PT = 595.28;
+const A4_HEIGHT_PT = 841.89;
+const MARGIN_PT = 28.35; // ~1cm
+const BODY_PADDING_PT = 15; // 20px * 0.75
+const COLUMN_GAP_PT = 24; // 2rem ≈ 32px * 0.75
+const TASK_BOTTOM_MARGIN_PT = 18; // 24px * 0.75
+const TASK_NUMBER_HEIGHT_PT = 16; // approximate height of task number line
+const LINE_HEIGHT_MULTIPLIER = 1.4;
 
-    if (!isMultiplication) {
-        return task.numbers.length + 1;
-    } else {
-        const n2 = task.numbers[1];
-        const n2Digits = Math.abs(n2).toString().length;
+function pxToPt(px: number): number {
+    return px * 0.75;
+}
 
-        if (n2Digits > 1) {
-            return 2 + n2Digits + 1;
-        } else {
-            return 2 + 1;
+function getTaskHeightPt(task: Task, config: Config): number {
+    const rows = getTaskRows(task);
+    const fontSizePt = pxToPt(config.fontSize);
+    const lineHeightPt = fontSizePt * LINE_HEIGHT_MULTIPLIER;
+    const rowsHeight = rows.length * lineHeightPt;
+    const numberHeight = config.showTaskNumbers ? TASK_NUMBER_HEIGHT_PT : 0;
+    return rowsHeight + numberHeight + TASK_BOTTOM_MARGIN_PT;
+}
+
+interface PageLayout {
+    columns: Task[][]; // each column is a list of tasks
+}
+
+function paginateForPdf(tasks: Task[], config: Config): PageLayout[] {
+    const isLandscape = config.orientation === 'landscape';
+    const pageHeight = isLandscape ? A4_WIDTH_PT : A4_HEIGHT_PT;
+    const availableHeight = pageHeight - (2 * MARGIN_PT) - (2 * BODY_PADDING_PT);
+
+    const numColumns = config.columns;
+    const pages: PageLayout[] = [];
+    let taskIndex = 0;
+
+    while (taskIndex < tasks.length) {
+        const columns: Task[][] = [];
+
+        for (let col = 0; col < numColumns && taskIndex < tasks.length; col++) {
+            const column: Task[] = [];
+            let usedHeight = 0;
+
+            while (taskIndex < tasks.length) {
+                const taskHeight = getTaskHeightPt(tasks[taskIndex], config);
+
+                if (column.length > 0 && usedHeight + taskHeight > availableHeight) {
+                    break;
+                }
+
+                column.push(tasks[taskIndex]);
+                usedHeight += taskHeight;
+                taskIndex++;
+            }
+
+            if (column.length > 0) {
+                columns.push(column);
+            }
+        }
+
+        if (columns.length > 0) {
+            pages.push({ columns });
         }
     }
+
+    return pages;
 }
 
 function getTaskGridWidth(task: Task): number {
@@ -80,11 +130,11 @@ function getTaskRows(task: Task): TaskRow[] {
         const divisor = task.numbers[1];
         const quotient = task.answer;
         const remainder = task.remainder || 0;
-        
+
         const dividendStr = dividend.toString();
         const steps: Array<{ type: 'subtract' | 'result'; value: number; position: number }> = [];
         let currentDividend = 0;
-        
+
         for (let i = 0; i < dividendStr.length; i++) {
             currentDividend = currentDividend * 10 + parseInt(dividendStr[i]);
             if (currentDividend >= divisor) {
@@ -98,7 +148,7 @@ function getTaskRows(task: Task): TaskRow[] {
                 currentDividend = stepRemainder;
             }
         }
-        
+
         const dividendLength = dividend.toString().length;
         const rows: TaskRow[] = [
             {
@@ -111,7 +161,7 @@ function getTaskRows(task: Task): TaskRow[] {
                 offset: 0, hasLineBelow: false, isDivisionDividend: true, divisor: divisor
             }
         ];
-        
+
         steps.forEach((step) => {
             const rightAlignPosition = step.position + 1;
             const offset = Math.max(0, dividendLength - rightAlignPosition);
@@ -127,7 +177,7 @@ function getTaskRows(task: Task): TaskRow[] {
                 });
             }
         });
-        
+
         return rows;
     } else if (!isMultiplication) {
         return [
@@ -187,7 +237,7 @@ function renderTaskToHtml(task: Task, config: Config, maxGridWidth: number): str
     const isDivision = task.operations.includes('÷');
 
     let html = `<div style="margin-bottom: 24px; ${isDivision ? 'margin-right: 60px;' : ''}">`;
-    
+
     if (config.showTaskNumbers) {
         html += `<div style="font-family: 'Roboto Mono', monospace; margin-bottom: 8px; font-size: ${fontSize * 0.7}px;">${task.id}.</div>`;
     }
@@ -200,7 +250,7 @@ function renderTaskToHtml(task: Task, config: Config, maxGridWidth: number): str
         const totalCells = maxGridWidth;
         const leftPadding = Math.max(0, totalCells - (digits.length + row.offset));
         const shouldHideContent = (row.isResult || row.isPartial) && config.showAnswers === 'none';
-        
+
         const contentCells = digits.length + row.offset;
         const lineStartPosition = fontSize + (leftPadding * cellWidth);
         const lineExtension = cellWidth * 0.3;
@@ -223,7 +273,7 @@ function renderTaskToHtml(task: Task, config: Config, maxGridWidth: number): str
             const isLastDigit = i === digits.length - 1;
             const showDivisorHere = isLastDigit && row.isDivisionDividend && row.divisor !== undefined;
             const color = shouldHideContent ? 'transparent' : 'inherit';
-            
+
             html += `<div style="border: ${cellBorder}; height: ${lineHeight}px; display: flex; align-items: center; justify-content: center; color: ${color}; box-sizing: border-box; position: relative;">`;
             html += digits[i];
             if (showDivisorHere) {
@@ -259,12 +309,25 @@ function renderTaskToHtml(task: Task, config: Config, maxGridWidth: number): str
 
 export function renderTasksToHtml(tasks: Task[], config: Config): string {
     const maxGridWidth = getMaxGridWidth(tasks);
-    
     const orientation = config.orientation === 'portrait' ? 'portrait' : 'landscape';
-    
-    let tasksHtml = '';
-    for (const task of tasks) {
-        tasksHtml += renderTaskToHtml(task, config, maxGridWidth);
+    const pages = paginateForPdf(tasks, config);
+
+    let pagesHtml = '';
+    for (let pageIdx = 0; pageIdx < pages.length; pageIdx++) {
+        const page = pages[pageIdx];
+        const isLastPage = pageIdx === pages.length - 1;
+        const pageBreak = isLastPage ? '' : 'page-break-after: always;';
+
+        let columnsHtml = '';
+        for (const column of page.columns) {
+            columnsHtml += '<div style="display: flex; flex-direction: column;">';
+            for (const task of column) {
+                columnsHtml += renderTaskToHtml(task, config, maxGridWidth);
+            }
+            columnsHtml += '</div>';
+        }
+
+        pagesHtml += `<div style="display: grid; grid-template-columns: repeat(${config.columns}, 1fr); gap: 2rem; ${pageBreak}">${columnsHtml}</div>`;
     }
 
     return `<!DOCTYPE html>
@@ -286,17 +349,10 @@ export function renderTasksToHtml(tasks: Task[], config: Config): string {
             font-family: 'Roboto Mono', monospace;
             background: white;
         }
-        .tasks-grid {
-            display: grid;
-            grid-template-columns: repeat(${config.columns}, 1fr);
-            gap: 2rem;
-        }
     </style>
 </head>
 <body>
-    <div class="tasks-grid">
-        ${tasksHtml}
-    </div>
+    ${pagesHtml}
 </body>
 </html>`;
 }
@@ -315,7 +371,7 @@ export async function generatePdf(htmlContent: string, outputPath: string): Prom
             // Fallback: try chromium/google-chrome headless
             const browsers = ['chromium-browser', 'chromium', 'google-chrome', 'google-chrome-stable'];
             let browserFound = false;
-            
+
             for (const browser of browsers) {
                 try {
                     await execAsync(`which ${browser}`);
@@ -327,7 +383,7 @@ export async function generatePdf(htmlContent: string, outputPath: string): Prom
                     continue;
                 }
             }
-            
+
             if (!browserFound) {
                 throw new Error('Nie znaleziono narzędzia do generowania PDF. Zainstaluj wkhtmltopdf lub chromium: sudo apt install wkhtmltopdf');
             }

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { ConfigPanel } from './components/ConfigPanel';
 import { Preview } from './components/Preview';
 import { useApi } from './hooks/useApi';
-import { saveConfigToServer } from './services/api';
+import { downloadPdf, saveConfigToServer } from './services/api';
 import type { Config, ValidationError } from './types';
 import { exportConfigToJson, importConfigFromJson } from './utils/configIO';
 import { loadConfig, saveConfig } from './utils/localStorage';
@@ -76,6 +76,7 @@ function App() {
   const [errors, setErrors] = useState<ValidationError[]>([]);
   const { tasks, isGenerating, error: generatorError, generate } = useApi();
   const [saveStatus, setSaveStatus] = useState<string | null>(null);
+  const [pdfStatus, setPdfStatus] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Save configuration to localStorage whenever it changes
@@ -132,6 +133,17 @@ function App() {
       alert(err instanceof Error ? err.message : 'Błąd importu');
     }
     if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  const handleDownloadPdf = async () => {
+    try {
+      setPdfStatus('generating');
+      await downloadPdf(config);
+      setPdfStatus(null);
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Błąd generowania PDF');
+      setPdfStatus(null);
+    }
   };
 
   const handleSaveToServer = async () => {
@@ -214,6 +226,13 @@ function App() {
                   className="hidden"
                 />
               </label>
+              <button
+                onClick={handleDownloadPdf}
+                disabled={tasks.length === 0 || pdfStatus === 'generating'}
+                className="px-4 py-3 bg-white/10 backdrop-blur-sm border border-white/20 text-white rounded-lg hover:bg-white/20 text-sm transition disabled:opacity-50 disabled:cursor-not-allowed no-print"
+              >
+                {pdfStatus === 'generating' ? '⏳ Generowanie PDF...' : '📄 Zapisz do PDF'}
+              </button>
               <button
                 onClick={handleSaveToServer}
                 className="px-4 py-3 bg-white/10 backdrop-blur-sm border border-white/20 text-white rounded-lg hover:bg-white/20 text-sm transition no-print"

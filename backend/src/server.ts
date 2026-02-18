@@ -1,13 +1,13 @@
-import express from 'express';
 import cors from 'cors';
+import express from 'express';
 import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import routes from './routes.js';
+import { generatePdf, renderTasksToHtml } from './services/pdfService.js';
+import { getAvailablePrinters, markAsPrintedToday, printPdf } from './services/printService.js';
 import type { Config } from './types.js';
-import { generateTasks, generateDateSeed } from './utils/generator.js';
-import { renderTasksToHtml, generatePdf } from './services/pdfService.js';
-import { hasAlreadyPrintedToday, markAsPrintedToday, printPdf, getAvailablePrinters } from './services/printService.js';
+import { generateDateSeed, generateTasks } from './utils/generator.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const CONFIG_PATH = path.resolve(__dirname, '../data/config.json');
@@ -29,7 +29,7 @@ async function loadConfig(): Promise<Config | null> {
 async function autoPrintOnStartup(): Promise<void> {
     console.log('[Startup] Sprawdzanie automatycznego drukowania...');
 
-    const alreadyPrinted = await hasAlreadyPrintedToday();
+    const alreadyPrinted = true; //= await hasAlreadyPrintedToday();
     if (alreadyPrinted) {
         console.log('[Startup] Już drukowano dzisiaj - pomijanie');
         return;
@@ -60,7 +60,7 @@ async function autoPrintOnStartup(): Promise<void> {
 
     // Render to HTML and generate PDF
     const html = renderTasksToHtml(tasks, configWithDateSeed);
-    
+
     await fs.mkdir(DATA_DIR, { recursive: true });
 
     try {

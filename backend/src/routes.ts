@@ -1,8 +1,9 @@
-import { Router } from 'express';
 import type { Request, Response } from 'express';
+import { Router } from 'express';
 import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { generatePdf, renderTasksToHtml } from './services/pdfService.js';
 import type { Config } from './types.js';
 import { generateTasks } from './utils/generator.js';
 
@@ -64,6 +65,43 @@ router.get('/config', async (_req: Request, res: Response) => {
             console.error('[API] Błąd odczytu konfiguracji:', error);
             res.status(500).json({ error: 'Błąd odczytu konfiguracji' });
         }
+    }
+});
+
+// POST /api/pdf - generowanie PDF do pobrania
+router.post('/pdf', async (req: Request, res: Response) => {
+    try {
+        const config: Config = req.body;
+
+        if (!config || !config.seed) {
+            res.status(400).json({ error: 'Brak konfiguracji lub seed' });
+            return;
+        }
+
+        const tasks = generateTasks(config);
+        if (tasks.length === 0) {
+            res.status(400).json({ error: 'Nie wygenerowano żadnych zadań' });
+            return;
+        }
+
+        const html = renderTasksToHtml(tasks, config);
+        const pdfPath = path.join(DATA_DIR, `download-${Date.now()}.pdf`);
+
+        await fs.mkdir(DATA_DIR, { recursive: true });
+        await generatePdf(html, pdfPath);
+
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', 'attachment; filename="zadania.pdf"');
+
+        const pdfBuffer = await fs.readFile(pdfPath);
+        res.send(pdfBuffer);
+
+        // Cleanup
+        await fs.unlink(pdfPath).catch(() => { });
+    } catch (error) {
+        console.error('[API] Błąd generowania PDF:', error);
+        const message = error instanceof Error ? error.message : 'Błąd generowania PDF';
+        res.status(500).json({ error: message });
     }
 });
 

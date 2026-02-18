@@ -31,6 +31,29 @@ export async function saveConfigToServer(config: Config): Promise<void> {
     }
 }
 
+export async function downloadPdf(config: Config): Promise<void> {
+    const response = await fetch(`${API_BASE}/pdf`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(config),
+    });
+
+    if (!response.ok) {
+        const error = await response.json().catch(() => ({ error: 'Błąd serwera' }));
+        throw new Error(error.error || 'Błąd generowania PDF');
+    }
+
+    const blob = await response.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'zadania.pdf';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+
 export async function loadConfigFromServer(): Promise<Config | null> {
     try {
         const response = await fetch(`${API_BASE}/config`);

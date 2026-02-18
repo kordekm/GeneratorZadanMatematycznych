@@ -11,9 +11,9 @@ export function generateDivisionNumbers(
 
     if (!allowRemainder) {
         const divisor = randomIntInclusive(rng, minDivisor, maxDivisor);
-        const minDividend = Math.pow(10, dividendDigits - 1);
+        const minDividend = Math.max(2, Math.pow(10, dividendDigits - 1));
         const maxDividend = Math.pow(10, dividendDigits) - 1;
-        const minQuotient = Math.ceil(minDividend / divisor);
+        const minQuotient = Math.max(2, Math.ceil(minDividend / divisor));
         const maxQuotient = Math.floor(maxDividend / divisor);
 
         if (minQuotient > maxQuotient) {
@@ -25,7 +25,7 @@ export function generateDivisionNumbers(
 
         return [dividend, divisor];
     } else {
-        const minDividend = Math.pow(10, dividendDigits - 1);
+        const minDividend = Math.max(2, Math.pow(10, dividendDigits - 1));
         const maxDividend = Math.pow(10, dividendDigits) - 1;
         const dividend = randomIntInclusive(rng, minDividend, maxDividend);
         const divisor = randomIntInclusive(rng, minDivisor, maxDivisor);

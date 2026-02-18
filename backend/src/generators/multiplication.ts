@@ -1,15 +1,15 @@
 import type { CarryMode } from '../types.js';
-import { randomIntInclusive, getDigits } from '../utils/math.js';
 import { hasCarryOrBorrow } from '../utils/carry.js';
+import { getDigits, randomIntInclusive } from '../utils/math.js';
 
 export function generateMultiplicationNumbers(
     rng: () => number,
     factor1Digits: number,
     factor2Digits: number
 ): number[] {
-    const min1 = Math.pow(10, factor1Digits - 1);
+    const min1 = Math.max(2, Math.pow(10, factor1Digits - 1));
     const max1 = Math.pow(10, factor1Digits) - 1;
-    const min2 = Math.pow(10, factor2Digits - 1);
+    const min2 = Math.max(2, Math.pow(10, factor2Digits - 1));
     const max2 = Math.pow(10, factor2Digits) - 1;
 
     return [
@@ -60,9 +60,9 @@ export function generateMultiplicationTask(
     if (carryMode === 'no-carry' && hasCarry) valid = false;
     if (carryMode === 'must-carry' && !hasCarry) valid = false;
 
-    return { 
-        numbers, 
-        operations: ['*'], 
-        found: valid 
+    return {
+        numbers,
+        operations: ['*'],
+        found: valid
     };
 }

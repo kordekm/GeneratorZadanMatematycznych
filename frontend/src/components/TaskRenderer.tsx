@@ -177,15 +177,6 @@ export function TaskRenderer({ task, fontSize, showNumber, gridMode, showAnswers
     }
   }, [task, isMultiplication, isDivision]);
 
-  // Determine border style based on gridMode
-  const getBorderStyle = () => {
-    if (gridMode === 'off') return 'none';
-    if (gridMode === 'light') return '1px solid #d0d0d0';  // Jasna kratka - jasny szary
-    if (gridMode === 'medium') return '1px solid #808080'; // Średnia kratka - ciemny szary
-    return 'none';
-  };
-
-  const cellBorder = getBorderStyle();
 
   return (
     <div className="mb-6" style={{ marginRight: isDivision ? '60px' : '0' }}>
@@ -211,10 +202,19 @@ export function TaskRenderer({ task, fontSize, showNumber, gridMode, showAnswers
           const isDivisionDividend = (row as any).isDivisionDividend;
           const divisor = (row as any).divisor;
 
-          const contentCells = digits.length + row.offset;
-          const lineStartPosition = fontSize + (leftPadding * cellWidth);
+          let currentLineLeftPadding = leftPadding;
+          let currentContentCells = digits.length + row.offset;
+
+          if (!isDivision) {
+            // Linia powinna mieć długość najszerszego z operandów lub wyniku
+            const maxContentCells = Math.max(...rows.map(r => Math.abs(r.number).toString().length + r.offset));
+            currentContentCells = maxContentCells;
+            currentLineLeftPadding = Math.max(0, totalCells - maxContentCells);
+          }
+
+          const lineStartPosition = fontSize + (currentLineLeftPadding * cellWidth);
           const lineExtension = cellWidth * 0.3;
-          const lineWidth = (contentCells * cellWidth) + lineExtension;
+          const lineWidth = (currentContentCells * cellWidth) + lineExtension;
 
           return (
             <div key={rowIdx} style={{ position: 'relative' }}>
@@ -241,8 +241,8 @@ export function TaskRenderer({ task, fontSize, showNumber, gridMode, showAnswers
               {Array(leftPadding).fill(0).map((_, i) => (
                 <div
                   key={`pad-left-${i}`}
+                  className={`grid-border-${gridMode}`}
                   style={{
-                    border: cellBorder,
                     height: `${lineHeight}px`,
                     display: 'flex',
                     alignItems: 'center',
@@ -262,8 +262,8 @@ export function TaskRenderer({ task, fontSize, showNumber, gridMode, showAnswers
                 return (
                   <div
                     key={`digit-${i}`}
+                    className={`grid-border-${gridMode}`}
                     style={{
-                      border: cellBorder,
                       height: `${lineHeight}px`,
                       display: 'flex',
                       alignItems: 'center',
@@ -306,8 +306,8 @@ export function TaskRenderer({ task, fontSize, showNumber, gridMode, showAnswers
               {Array(row.offset).fill(0).map((_, i) => (
                 <div
                   key={`pad-right-${i}`}
+                  className={`grid-border-${gridMode}`}
                   style={{
-                    border: cellBorder,
                     height: `${lineHeight}px`,
                     display: 'flex',
                     alignItems: 'center',

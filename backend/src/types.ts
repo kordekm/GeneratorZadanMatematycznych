@@ -50,6 +50,10 @@ export interface Config {
     carryMode: CarryMode;
     seed: string;
 
+    // Auto-print settings
+    autoPrintEnabled: boolean;
+    autoPrintTime: string; // format "HH:MM"
+
     // Operations
     addition: AdditionConfig;
     subtraction: SubtractionConfig;

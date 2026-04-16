@@ -4,6 +4,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { generatePdf, renderTasksToHtml } from './services/pdfService.js';
+import { scheduleAutoPrint } from './services/schedulerService.js';
 import type { Config } from './types.js';
 import { generateTasks } from './utils/generator.js';
 
@@ -43,6 +44,8 @@ router.post('/config', async (req: Request, res: Response) => {
 
         await fs.mkdir(DATA_DIR, { recursive: true });
         await fs.writeFile(CONFIG_PATH, JSON.stringify(config, null, 2), 'utf-8');
+
+        scheduleAutoPrint(config.autoPrintEnabled, config.autoPrintTime);
 
         console.log('[API] Konfiguracja zapisana do', CONFIG_PATH);
         res.json({ success: true, message: 'Konfiguracja zapisana' });

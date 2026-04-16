@@ -24,7 +24,11 @@ const DEFAULT_CONFIG: Config = {
   // Logic settings
   carryMode: 'any',
   seed: generateSeed(),
-  
+
+  // Auto-print settings
+  autoPrintEnabled: false,
+  autoPrintTime: '07:00',
+
   // Operations
   addition: {
     enabled: true,

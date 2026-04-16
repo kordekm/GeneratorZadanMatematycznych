@@ -3,6 +3,7 @@ import { AdditionConfig } from './config/AdditionConfig';
 import { AppearanceConfig } from './config/AppearanceConfig';
 import { DivisionConfig } from './config/DivisionConfig';
 import { MultiplicationConfigPanel } from './config/MultiplicationConfig';
+import { PrintConfig } from './config/PrintConfig';
 import { SubtractionConfig } from './config/SubtractionConfig';
 
 interface ConfigPanelProps {
@@ -22,6 +23,7 @@ export function ConfigPanel({ config, onChange, errors }: ConfigPanelProps) {
         <MultiplicationConfigPanel config={config} onChange={onChange} />
         <DivisionConfig config={config} onChange={onChange} />
         <AppearanceConfig config={config} onChange={onChange} errors={errors} />
+        <PrintConfig config={config} onChange={onChange} />
       </div>
     </div>
   );

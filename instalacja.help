@@ -32,7 +32,7 @@ Wszystkie pliki gotowe. Oto co zostało stworzone i jak to uruchomić:
   W Home Assistant: Ustawienia → Add-ony → sklep z dodatkami (⋮) → Repozytoria                                                                        
   
   Wklej URL swojego repozytorium GitHub, np.:                                                                                                         
-  https://github.com/TWOJ_GITHUB/GeneratorZadanMatematycznych                                                                                       
+  https://github.com/kordekm/GeneratorZadanMatematycznych                                                                                       
                                                                                                                                                       
   4. Zainstaluj add-on                                                                                                                              
                                                                                                                                                       

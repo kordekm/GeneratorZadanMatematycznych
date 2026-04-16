@@ -1,7 +1,7 @@
 ARG BUILD_FROM
 FROM $BUILD_FROM
 
-ARG REPO_URL=https://github.com/TWOJ_GITHUB/GeneratorZadanMatematycznych
+ARG REPO_URL=https://github.com/kordekm/GeneratorZadanMatematycznych
 
 RUN apk add --no-cache nodejs npm git
 

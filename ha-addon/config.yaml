@@ -2,7 +2,7 @@ name: Generator Kart Matematycznych
 description: Generator kart pracy z matematyki - dodawanie, odejmowanie, mnozenie, dzielenie pisemne
 version: "1.0.0"
 slug: generator_kart_matematycznych
-url: https://github.com/TWOJ_GITHUB/GeneratorZadanMatematycznych
+url: https://github.com/kordekm/GeneratorZadanMatematycznych
 arch:
   - aarch64
   - amd64

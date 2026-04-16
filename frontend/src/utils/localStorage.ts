@@ -12,7 +12,7 @@ function isLocalStorageAvailable(): boolean {
         localStorage.setItem(test, test);
         localStorage.removeItem(test);
         return true;
-    } catch (e) {
+    } catch {
         return false;
     }
 }
@@ -61,7 +61,7 @@ export function loadConfig(): Config | null {
         // Clear corrupted data
         try {
             localStorage.removeItem(STORAGE_KEY);
-        } catch (e) {
+        } catch {
             // Ignore if we can't clear
         }
         return null;

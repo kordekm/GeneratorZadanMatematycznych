@@ -6,7 +6,7 @@ interface SubtractionConfigProps {
 }
 
 export function SubtractionConfig({ config, onChange }: SubtractionConfigProps) {
-  const handleChange = (field: keyof Config['subtraction'], value: any) => {
+  const handleChange = <K extends keyof Config['subtraction']>(field: K, value: Config['subtraction'][K]) => {
     onChange({
       ...config,
       subtraction: {

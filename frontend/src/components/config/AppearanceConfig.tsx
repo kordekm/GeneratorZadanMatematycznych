@@ -1,4 +1,4 @@
-import type { Config, ValidationError } from '../../types';
+import type { Config, GridMode, ValidationError } from '../../types';
 
 interface AppearanceConfigProps {
   config: Config;
@@ -42,7 +42,7 @@ export function AppearanceConfig({ config, onChange, errors }: AppearanceConfigP
           </label>
           <select
             value={config.gridMode}
-            onChange={(e) => handleChange('gridMode', e.target.value as any)}
+            onChange={(e) => handleChange('gridMode', e.target.value as GridMode)}
             className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
           >
             <option value="off">Wyłączona</option>
@@ -57,7 +57,7 @@ export function AppearanceConfig({ config, onChange, errors }: AppearanceConfigP
           </label>
           <select
             value={config.columns}
-            onChange={(e) => handleChange('columns', parseInt(e.target.value) as any)}
+            onChange={(e) => handleChange('columns', parseInt(e.target.value) as Config['columns'])}
             className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
           >
             <option value={1}>1</option>

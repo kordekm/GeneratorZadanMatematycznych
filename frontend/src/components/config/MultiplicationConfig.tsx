@@ -8,7 +8,7 @@ interface MultiplicationConfigProps {
 
 export function MultiplicationConfigPanel({ config, onChange }: MultiplicationConfigProps) {
 
-    const handleChange = (field: keyof Config['multiplication'], value: any) => {
+    const handleChange = <K extends keyof Config['multiplication']>(field: K, value: Config['multiplication'][K]) => {
         onChange({
             ...config,
             multiplication: {

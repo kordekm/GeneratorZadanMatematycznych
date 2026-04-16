@@ -1,6 +1,19 @@
 import { useMemo } from 'react';
 import type { Task } from '../types';
 
+interface Row {
+  number: number;
+  operation: string | null;
+  isResult: boolean;
+  isPartial: boolean;
+  offset: number;
+  hasLineBelow: boolean;
+  isDivisionQuotient?: boolean;
+  isDivisionDividend?: boolean;
+  remainder?: number;
+  divisor?: number;
+}
+
 interface TaskRendererProps {
   task: Task;
   fontSize: number;
@@ -18,7 +31,7 @@ export function TaskRenderer({ task, fontSize, showNumber, gridMode, showAnswers
   const isMultiplication = task.operations.includes('*');
   const isDivision = task.operations.includes('÷');
 
-  const rows = useMemo(() => {
+  const rows = useMemo<Row[]>(() => {
     if (isDivision) {
       // Division Logic - Long Division Format
       const dividend = task.numbers[0];
@@ -65,7 +78,7 @@ export function TaskRenderer({ task, fontSize, showNumber, gridMode, showAnswers
       // Build rows for division display
       const dividendLength = dividend.toString().length;
       
-      const divisionRows = [
+      const divisionRows: Row[] = [
         {
           number: quotient,
           operation: null,
@@ -101,7 +114,7 @@ export function TaskRenderer({ task, fontSize, showNumber, gridMode, showAnswers
             isPartial: true,
             offset: offset,
             hasLineBelow: true
-          } as any);
+          });
         } else if (step.type === 'result') {
           divisionRows.push({
             number: step.value,
@@ -110,7 +123,7 @@ export function TaskRenderer({ task, fontSize, showNumber, gridMode, showAnswers
             isPartial: true,
             offset: offset,
             hasLineBelow: false
-          } as any);
+          });
         }
       });
       
@@ -197,10 +210,10 @@ export function TaskRenderer({ task, fontSize, showNumber, gridMode, showAnswers
           const shouldHideContent = (row.isResult || row.isPartial) && !showAnswers;
           
           // Special handling for division quotient with remainder
-          const isDivisionQuotient = (row as any).isDivisionQuotient;
-          const divisionRemainder = (row as any).remainder;
-          const isDivisionDividend = (row as any).isDivisionDividend;
-          const divisor = (row as any).divisor;
+          const isDivisionQuotient = row.isDivisionQuotient;
+          const divisionRemainder = row.remainder;
+          const isDivisionDividend = row.isDivisionDividend;
+          const divisor = row.divisor;
 
           let currentLineLeftPadding = leftPadding;
           let currentContentCells = digits.length + row.offset;

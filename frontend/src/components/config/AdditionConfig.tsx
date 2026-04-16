@@ -6,7 +6,7 @@ interface AdditionConfigProps {
 }
 
 export function AdditionConfig({ config, onChange }: AdditionConfigProps) {
-  const handleChange = (field: keyof Config['addition'], value: any) => {
+  const handleChange = <K extends keyof Config['addition']>(field: K, value: Config['addition'][K]) => {
     onChange({
       ...config,
       addition: {

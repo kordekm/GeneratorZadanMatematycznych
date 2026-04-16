@@ -6,7 +6,7 @@ interface DivisionConfigProps {
 }
 
 export function DivisionConfig({ config, onChange }: DivisionConfigProps) {
-    const handleChange = (field: keyof Config['division'], value: any) => {
+    const handleChange = <K extends keyof Config['division']>(field: K, value: Config['division'][K]) => {
         onChange({
             ...config,
             division: {

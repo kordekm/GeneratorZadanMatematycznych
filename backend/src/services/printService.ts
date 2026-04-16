@@ -32,9 +32,12 @@ export async function markAsPrintedToday(): Promise<void> {
 }
 
 export async function printPdf(pdfPath: string, printerName?: string): Promise<void> {
-    const printerArg = printerName ? `-d ${printerName}` : '';
-    const command = `lp ${printerArg} "${pdfPath}"`;
-    
+    if (printerName && !/^[\w\-]+$/.test(printerName)) {
+        throw new Error(`Nieprawidłowa nazwa drukarki: "${printerName}"`);
+    }
+    const args = ['lp', ...(printerName ? ['-d', printerName] : []), pdfPath];
+    const command = args.map(a => `"${a}"`).join(' ');
+
     console.log(`[PrintService] Drukowanie: ${command}`);
     
     try {

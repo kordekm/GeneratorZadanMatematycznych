@@ -97,10 +97,11 @@ router.post('/pdf', async (req: Request, res: Response) => {
         res.setHeader('Content-Disposition', 'attachment; filename="zadania.pdf"');
 
         const pdfBuffer = await fs.readFile(pdfPath);
-        res.send(pdfBuffer);
-
-        // Cleanup
-        await fs.unlink(pdfPath).catch(() => { });
+        try {
+            res.send(pdfBuffer);
+        } finally {
+            await fs.unlink(pdfPath).catch(() => { });
+        }
     } catch (error) {
         console.error('[API] Błąd generowania PDF:', error);
         const message = error instanceof Error ? error.message : 'Błąd generowania PDF';

@@ -108,6 +108,13 @@ async function main(): Promise<void> {
         res.json({ status: 'ok', timestamp: new Date().toISOString() });
     });
 
+    // Serve frontend static files (production / HA add-on mode)
+    const FRONTEND_DIST = path.resolve(__dirname, 'public');
+    app.use(express.static(FRONTEND_DIST));
+    app.get('*', (_req, res) => {
+        res.sendFile(path.join(FRONTEND_DIST, 'index.html'));
+    });
+
     // Start server
     app.listen(PORT, () => {
         console.log(`[Server] Backend uruchomiony na http://localhost:${PORT}`);

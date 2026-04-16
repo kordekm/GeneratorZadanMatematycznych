@@ -1,0 +1,49 @@
+instalacja:
+Wszystkie pliki gotowe. Oto co zostało stworzone i jak to uruchomić:                                                                                
+                                                                                                                                                      
+  ---                                                                                                                                                 
+  Struktura plików                                                                                                                                    
+                                                                                                                                                      
+  GeneratorZadanMatematycznych/                                                                                                                       
+  ├── repository.yaml          ← rejestr add-onów dla HA
+  ├── ha-addon/                                                                                                                                       
+  │   ├── config.yaml          ← definicja add-ona (ikona, port, opcje)                                                                             
+  │   ├── Dockerfile           ← buduje obraz: klonuje repo, buduje app                                                                               
+  │   └── run.sh               ← uruchamia kontener                                                                                                   
+  └── backend/src/server.ts    ← (zmodyfikowany: serwuje frontend statycznie)                                                                         
+                                                                                                                                                      
+  ---                                                                                                                                               
+  Kroki do uruchomienia                                                                                                                               
+                                                                                                                                                      
+  1. Podmień URL GitHuba                                                                                                                              
+                                                                                                                                                      
+  W dwóch miejscach zastąp TWOJ_GITHUB swoją nazwą użytkownika:                                                                                       
+  - repository.yaml → url:                                                                                              
+  - ha-addon/Dockerfile → ARG REPO_URL=                                                                                                               
+                                                                                                                                                    
+  2. Wypchnij kod na GitHub                                                                                                                           
+                                                                                                                                                      
+  git add -A                                                                                                                                          
+  git commit -m "feat: Add Home Assistant Supervisor add-on"                                                                                          
+  git push                                                                                                                                            
+  
+  3. Dodaj repozytorium w HA                                                                                                                          
+                                                                                                                                                    
+  W Home Assistant: Ustawienia → Add-ony → sklep z dodatkami (⋮) → Repozytoria                                                                        
+  
+  Wklej URL swojego repozytorium GitHub, np.:                                                                                                         
+  https://github.com/TWOJ_GITHUB/GeneratorZadanMatematycznych                                                                                       
+                                                                                                                                                      
+  4. Zainstaluj add-on                                                                                                                              
+                                                                                                                                                      
+  Na liście add-onów pojawi się "Generator Kart Matematycznych" → Zainstaluj → Uruchom.                                                               
+                                                                                                                                                      
+  Pierwsze uruchomienie trwa dłużej — HA buduje obraz Dockera klonując repo i kompilując TypeScript.                                                  
+                                                                                                                                                    
+  5. Dostęp                                                                                                                                           
+                                                                                                                                                    
+  Add-on pojawi się w lewym panelu HA jako "Karty Mat." (ikona kalkulatora) lub pod:                                                                  
+  http://homeassistant.local:8123/api/hassio_ingress/generator_kart_matematycznych/
+                                                                                                                                                      
+  ---                                                                                                                                                 
+  ▎ Uwaga: Jeśli masz drukarkę CUPS podłączoną do HA, możesz wpisać jej nazwę w opcjach add-ona (Konfiguracja → printer_name).

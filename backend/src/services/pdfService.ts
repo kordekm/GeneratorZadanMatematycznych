@@ -257,15 +257,17 @@ function renderTaskToHtml(task: Task, config: Config, maxGridWidth: number): str
         const lineWidth = (contentCells * cellWidth) + lineExtension;
 
         html += `<div style="position: relative;">`;
-        html += `<div style="display: grid; grid-template-columns: ${fontSize}px repeat(${totalCells}, ${cellWidth}px); margin-bottom: ${row.hasLineBelow ? '2px' : '0'};">`;
+        // flex zamiast grid — wkhtmltopdf nie obsługuje CSS Grid
+        html += `<div style="display: -webkit-flex; display: flex; -webkit-flex-direction: row; flex-direction: row; height: ${lineHeight}px; margin-bottom: ${row.hasLineBelow ? '2px' : '0'};">`;
 
         // Operation cell
-        const opText = row.isDivisionDividend ? '' : (!row.isResult && !row.isPartial && row.operation ? row.operation : '');
-        html += `<div style="display: flex; align-items: center; justify-content: center; height: ${lineHeight}px;">${opText}</div>`;
+        const opSymbol = row.operation === '*' ? '×' : row.operation;
+        const opText = row.isDivisionDividend ? '' : (!row.isResult && !row.isPartial && opSymbol ? opSymbol : '');
+        html += `<div style="width: ${fontSize}px; -webkit-flex-shrink: 0; flex-shrink: 0; display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; -webkit-justify-content: center; justify-content: center;">${opText}</div>`;
 
         // Left padding cells
         for (let i = 0; i < leftPadding; i++) {
-            html += `<div style="border: ${cellBorder}; height: ${lineHeight}px; display: flex; align-items: center; justify-content: center; box-sizing: border-box;">&nbsp;</div>`;
+            html += `<div style="width: ${cellWidth}px; -webkit-flex-shrink: 0; flex-shrink: 0; border: ${cellBorder}; display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; -webkit-justify-content: center; justify-content: center; box-sizing: border-box;">&nbsp;</div>`;
         }
 
         // Digit cells
@@ -274,7 +276,7 @@ function renderTaskToHtml(task: Task, config: Config, maxGridWidth: number): str
             const showDivisorHere = isLastDigit && row.isDivisionDividend && row.divisor !== undefined;
             const color = shouldHideContent ? 'transparent' : 'inherit';
 
-            html += `<div style="border: ${cellBorder}; height: ${lineHeight}px; display: flex; align-items: center; justify-content: center; color: ${color}; box-sizing: border-box; position: relative;">`;
+            html += `<div style="width: ${cellWidth}px; -webkit-flex-shrink: 0; flex-shrink: 0; border: ${cellBorder}; display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; -webkit-justify-content: center; justify-content: center; color: ${color}; box-sizing: border-box; position: relative;">`;
             html += digits[i];
             if (showDivisorHere) {
                 html += `<span style="position: absolute; left: 100%; white-space: nowrap;">:${row.divisor}</span>`;
@@ -284,16 +286,15 @@ function renderTaskToHtml(task: Task, config: Config, maxGridWidth: number): str
 
         // Remainder display for division quotient
         if (row.isDivisionQuotient && row.remainder !== undefined && !shouldHideContent) {
-            const spanCols = Math.max(1, totalCells - digits.length);
-            html += `<div style="grid-column: span ${spanCols}; display: flex; align-items: center; padding-left: 8px; font-size: ${fontSize * 0.9}px;">r. ${row.remainder}</div>`;
+            html += `<div style="-webkit-flex: 1; flex: 1; display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; padding-left: 8px; font-size: ${fontSize * 0.9}px;">r. ${row.remainder}</div>`;
         }
 
         // Right padding (offset) cells
         for (let i = 0; i < row.offset; i++) {
-            html += `<div style="border: ${cellBorder}; height: ${lineHeight}px; display: flex; align-items: center; justify-content: center; color: transparent; box-sizing: border-box;"></div>`;
+            html += `<div style="width: ${cellWidth}px; -webkit-flex-shrink: 0; flex-shrink: 0; border: ${cellBorder}; display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; -webkit-justify-content: center; justify-content: center; color: transparent; box-sizing: border-box;"></div>`;
         }
 
-        html += `</div>`; // close grid
+        html += `</div>`; // close flex row
 
         // Horizontal line below content
         if (row.hasLineBelow) {
@@ -319,15 +320,18 @@ export function renderTasksToHtml(tasks: Task[], config: Config): string {
         const pageBreak = isLastPage ? '' : 'page-break-after: always;';
 
         let columnsHtml = '';
-        for (const column of page.columns) {
-            columnsHtml += '<div style="display: flex; flex-direction: column;">';
+        for (let colIdx = 0; colIdx < page.columns.length; colIdx++) {
+            const column = page.columns[colIdx];
+            const isLastCol = colIdx === page.columns.length - 1;
+            const colMargin = isLastCol ? '' : 'margin-right: 2rem;';
+            columnsHtml += `<div style="-webkit-flex: 1; flex: 1; ${colMargin} display: -webkit-flex; display: flex; -webkit-flex-direction: column; flex-direction: column;">`;
             for (const task of column) {
                 columnsHtml += renderTaskToHtml(task, config, maxGridWidth);
             }
             columnsHtml += '</div>';
         }
 
-        pagesHtml += `<div style="display: grid; grid-template-columns: repeat(${config.columns}, 1fr); gap: 2rem; ${pageBreak}">${columnsHtml}</div>`;
+        pagesHtml += `<div style="display: -webkit-flex; display: flex; -webkit-flex-direction: row; flex-direction: row; ${pageBreak}">${columnsHtml}</div>`;
     }
 
     return `<!DOCTYPE html>
@@ -375,7 +379,7 @@ export async function generatePdf(htmlContent: string, outputPath: string): Prom
             for (const browser of browsers) {
                 try {
                     await execAsync(`which ${browser}`);
-                    await execAsync(`${browser} --headless --disable-gpu --no-sandbox --print-to-pdf="${outputPath}" "file://${tmpHtmlPath}"`);
+                    await execAsync(`${browser} --headless --disable-gpu --no-sandbox --print-to-pdf-no-header --print-to-pdf="${outputPath}" "file://${tmpHtmlPath}"`);
                     console.log(`[PdfService] PDF wygenerowany przez ${browser}`);
                     browserFound = true;
                     break;

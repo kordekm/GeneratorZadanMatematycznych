@@ -46,6 +46,21 @@ Każdy typ działania można włączyć/wyłączyć niezależnie:
 - Liczba kolumn (1-4)
 - Numerowanie zadań
 
+## ⚙️ Konfiguracja środowiska
+
+Backend czyta zmienne środowiskowe z pliku `backend/.env`. Skopiuj szablon i uzupełnij wartości:
+
+```bash
+cp backend/.env.example backend/.env
+```
+
+| Zmienna | Domyślna | Opis |
+|---|---|---|
+| `PORT` | `3001` | Port HTTP serwera backendowego |
+| `PRINTER_NAME` | _(pusta)_ | Nazwa drukarki CUPS; pusta = drukarka domyślna systemu |
+
+Dostępne drukarki wylistujesz poleceniem `lpstat -p`.
+
 ## 📋 Wymagania
 
 - Node.js (wersja 18 lub nowsza)

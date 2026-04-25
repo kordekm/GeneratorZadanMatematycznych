@@ -9,27 +9,22 @@ cleanup() {
 }
 trap cleanup INT TERM EXIT
 
-# ---------- Backend ----------
+# ---------- Backend (tsx watch) ----------
 cd "$SCRIPT_DIR/backend"
 if [ ! -d "node_modules" ]; then
   echo "Installing backend dependencies..."
   npm install
 fi
-echo "Rebuilding backend..."
-rm -rf dist
-npm run build
-echo "Starting backend..."
-node dist/server.js &
+echo "Starting backend in watch mode..."
+npm run dev &
 
-# ---------- Frontend ----------
+# ---------- Frontend (Vite dev) ----------
 cd "$SCRIPT_DIR/frontend"
 if [ ! -d "node_modules" ]; then
   echo "Installing frontend dependencies..."
   npm install
 fi
-echo "Building frontend..."
-npm run build
-echo "Starting frontend (Vite dev server)..."
+echo "Starting frontend in dev mode..."
 npm run dev &
 
 wait

@@ -3,6 +3,7 @@ import { Router } from 'express';
 import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { generateDailyPdfFromSavedConfig } from './services/dailyPdfService.js';
 import { generatePdf, renderTasksToHtml } from './services/pdfService.js';
 import { scheduleAutoPrint } from './services/schedulerService.js';
 import type { Config } from './types.js';
@@ -105,6 +106,28 @@ router.post('/pdf', async (req: Request, res: Response) => {
     } catch (error) {
         console.error('[API] Błąd generowania PDF:', error);
         const message = error instanceof Error ? error.message : 'Błąd generowania PDF';
+        res.status(500).json({ error: message });
+    }
+});
+
+// POST /api/daily-pdf - ręczne wygenerowanie dziennego PDF z zapisanej konfiguracji
+router.post('/daily-pdf', async (_req: Request, res: Response) => {
+    try {
+        const result = await generateDailyPdfFromSavedConfig();
+
+        res.json({
+            success: true,
+            message: 'PDF wygenerowany',
+            ...result,
+        });
+    } catch (error) {
+        if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+            res.status(404).json({ error: 'Brak zapisanej konfiguracji' });
+            return;
+        }
+
+        console.error('[API] Błąd generowania dziennego PDF:', error);
+        const message = error instanceof Error ? error.message : 'Błąd generowania dziennego PDF';
         res.status(500).json({ error: message });
     }
 });

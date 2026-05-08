@@ -4,7 +4,7 @@ import { generateDailyPdfFromSavedConfig } from '../services/dailyPdfService.js'
 async function main(): Promise<void> {
     const result = await generateDailyPdfFromSavedConfig();
 
-    console.log(`PDF wygenerowany: ${result.path}`);
+    console.log('PDF wygenerowany');
     console.log(`Seed: ${result.seed}`);
     console.log(`Liczba zadań: ${result.taskCount}`);
 }

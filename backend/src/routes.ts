@@ -118,7 +118,8 @@ router.post('/daily-pdf', async (_req: Request, res: Response) => {
         res.json({
             success: true,
             message: 'PDF wygenerowany',
-            ...result,
+            seed: result.seed,
+            taskCount: result.taskCount,
         });
     } catch (error) {
         if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
